@@ -1,0 +1,22 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="face" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#ffd7f0"/>
+      <stop offset="100%" stop-color="#ff8ccf"/>
+    </radialGradient>
+  </defs>
+
+  <circle cx="32" cy="34" r="22" fill="url(#face)" stroke="#2d1f2f" stroke-width="2"/>
+
+  <ellipse cx="16" cy="17" rx="7" ry="10" fill="#7fe7ff" stroke="#2d1f2f" stroke-width="1.5" transform="rotate(-30 16 17)"/>
+  <ellipse cx="48" cy="17" rx="7" ry="10" fill="#7fe7ff" stroke="#2d1f2f" stroke-width="1.5" transform="rotate(30 48 17)"/>
+
+  <circle cx="24" cy="30" r="5" fill="#fff" stroke="#2d1f2f" stroke-width="1.5"/>
+  <circle cx="40" cy="30" r="5" fill="#fff" stroke="#2d1f2f" stroke-width="1.5"/>
+  <circle cx="24" cy="31" r="2.2" fill="#2d1f2f"/>
+  <circle cx="40" cy="31" r="2.2" fill="#2d1f2f"/>
+  <circle cx="25" cy="30" r="0.8" fill="#fff"/>
+  <circle cx="41" cy="30" r="0.8" fill="#fff"/>
+
+  <path d="M 24 42 Q 32 48 40 42" fill="none" stroke="#2d1f2f" stroke-width="2" stroke-linecap="round"/>
+</svg>

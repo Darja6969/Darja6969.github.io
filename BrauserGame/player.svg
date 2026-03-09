@@ -1,0 +1,33 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Главное тело (круг) -->
+  <defs>
+    <radialGradient id="playerGradient" cx="35%" cy="35%">
+      <stop offset="0%" style="stop-color:#fff4a3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffcc00;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  
+  <circle cx="20" cy="22" r="16" fill="url(#playerGradient)" stroke="#000" stroke-width="1"/>
+  
+  <!-- Левое ухо (зелёное) -->
+  <ellipse cx="8" cy="10" rx="7" ry="10" fill="#90EE90" stroke="#000" stroke-width="0.5" transform="rotate(-30 8 10)"/>
+  
+  <!-- Правое ухо (фиолетовое) -->
+  <ellipse cx="32" cy="10" rx="7" ry="10" fill="#EE82EE" stroke="#000" stroke-width="0.5" transform="rotate(30 32 10)"/>
+  
+  <!-- Левый глаз -->
+  <circle cx="14" cy="18" r="4" fill="#fff" stroke="#000" stroke-width="1"/>
+  <circle cx="14" cy="18" r="2.5" fill="#000"/>
+  <circle cx="15" cy="17" r="0.8" fill="#fff"/>
+  
+  <!-- Правый глаз -->
+  <circle cx="26" cy="18" r="4" fill="#fff" stroke="#000" stroke-width="1"/>
+  <circle cx="26" cy="18" r="2.5" fill="#000"/>
+  <circle cx="27" cy="17" r="0.8" fill="#fff"/>
+  
+  <!-- Улыбка -->
+  <path d="M 16 27 Q 20 29 24 27" fill="none" stroke="#000" stroke-width="1" stroke-linecap="round"/>
+  
+  <!-- Язык -->
+  <ellipse cx="20" cy="31" rx="2" ry="2.5" fill="#ff69b4"/>
+</svg>
