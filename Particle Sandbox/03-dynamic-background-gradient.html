@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>03 Dynamic Background Gradient</title>
+  <style>
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      display: grid;
+      place-items: center;
+      font-family: "Lucida Sans", "Segoe UI", sans-serif;
+      color: #f8fafc;
+      transition: background 220ms linear;
+      background: linear-gradient(120deg, #ff6b6b, #feca57, #48dbfb, #1dd1a1);
+    }
+    .card {
+      text-align: center;
+      padding: 20px 26px;
+      border: 1px solid #ffffff55;
+      border-radius: 16px;
+      background: #0f172a44;
+      backdrop-filter: blur(6px);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Corner Driven Gradient</h1>
+    <p>Move mouse around corners to morph background tones.</p>
+  </div>
+
+  <script>
+    function mix(a, b, t) {
+      return Math.round(a + (b - a) * t);
+    }
+
+    function color(c1, c2, t) {
+      return `rgb(${mix(c1[0], c2[0], t)}, ${mix(c1[1], c2[1], t)}, ${mix(c1[2], c2[2], t)})`;
+    }
+
+    const topLeft = [255, 107, 107];
+    const topRight = [254, 202, 87];
+    const bottomLeft = [72, 219, 251];
+    const bottomRight = [29, 209, 161];
+
+    window.addEventListener("mousemove", (e) => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+
+      const top = color(topLeft, topRight, x);
+      const bottom = color(bottomLeft, bottomRight, x);
+      const center = color(
+        [255, 255, 255],
+        [10, 10, 40],
+        Math.abs(0.5 - x) + Math.abs(0.5 - y)
+      );
+
+      document.body.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, ${center}, transparent 40%), linear-gradient(140deg, ${top}, ${bottom})`;
+    });
+  </script>
+</body>
+</html>

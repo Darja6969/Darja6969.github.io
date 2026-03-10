@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>20 Screen Edge Warp</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(120deg, #dcfce7, #bbf7d0, #86efac);
+      font-family: Arial, sans-serif;
+    }
+    .ball {
+      position: absolute;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: #14532d;
+      background: #f0fdf4;
+      border: 2px solid #22c55e;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      box-shadow: 0 8px 16px #14532d30;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    const items = [];
+    for (let i = 0; i < 5; i += 1) {
+      const el = document.createElement("div");
+      el.className = "ball";
+      el.textContent = i + 1;
+      const obj = { el, x: 80 + i * 90, y: 120 + i * 40, drag: false, ox: 0, oy: 0 };
+      el.style.left = `${obj.x}px`;
+      el.style.top = `${obj.y}px`;
+      items.push(obj);
+      document.body.appendChild(el);
+
+      el.addEventListener("pointerdown", (e) => {
+        obj.drag = true;
+        obj.ox = e.clientX - obj.x;
+        obj.oy = e.clientY - obj.y;
+        el.setPointerCapture(e.pointerId);
+        el.style.cursor = "grabbing";
+      });
+      el.addEventListener("pointermove", (e) => {
+        if (!obj.drag) return;
+        obj.x = e.clientX - obj.ox;
+        obj.y = e.clientY - obj.oy;
+        const maxX = innerWidth - 74;
+        const maxY = innerHeight - 74;
+
+        // Pac-Man wrap when dragged outside viewport edges.
+        if (obj.x < -74) obj.x = maxX;
+        if (obj.x > maxX + 74) obj.x = 0;
+        if (obj.y < -74) obj.y = maxY;
+        if (obj.y > maxY + 74) obj.y = 0;
+
+        el.style.left = `${obj.x}px`;
+        el.style.top = `${obj.y}px`;
+      });
+      el.addEventListener("pointerup", () => {
+        obj.drag = false;
+        el.style.cursor = "grab";
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Interactive Chaos Playground</title>
+  <style>
+    :root {
+      --bg-a: #fff4e6;
+      --bg-b: #d7f9f1;
+      --ink: #102a43;
+      --panel: #ffffffcc;
+      --accent: #ef476f;
+    }
+    body.dark {
+      --bg-a: #0b132b;
+      --bg-b: #1c2541;
+      --ink: #f5f7ff;
+      --panel: #111827cc;
+      --accent: #06d6a0;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(120deg, var(--bg-a), var(--bg-b));
+      overflow-x: hidden;
+      cursor: none;
+      transition: background 200ms linear, color 200ms linear;
+    }
+    #trail {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+    #fx {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 7;
+      overflow: hidden;
+    }
+    .cursor {
+      position: fixed;
+      width: 26px;
+      height: 26px;
+      border: 3px solid var(--accent);
+      border-radius: 6px;
+      transform-origin: center;
+      pointer-events: none;
+      z-index: 50;
+      mix-blend-mode: multiply;
+    }
+    .cursor::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--accent), transparent 60%);
+    }
+    .hud {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      z-index: 40;
+      align-items: center;
+    }
+    .chip {
+      background: var(--panel);
+      border: 1px solid #00000022;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 13px;
+      backdrop-filter: blur(8px);
+    }
+    .magnet {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: var(--ink);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 100ms linear, box-shadow 140ms;
+      box-shadow: 0 8px 16px #00000026;
+      will-change: transform;
+    }
+    .magnet:active { transform: scale(0.97); }
+    .control-panel {
+      position: fixed;
+      top: 64px;
+      left: 10px;
+      right: 10px;
+      z-index: 41;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+      max-height: 32vh;
+      overflow: auto;
+      padding: 8px;
+      background: var(--panel);
+      border: 1px solid #00000022;
+      border-radius: 14px;
+      backdrop-filter: blur(8px);
+    }
+    .fx-btn {
+      border: 1px solid #00000030;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 12px;
+      text-align: left;
+      background: #ffffffc9;
+      color: #102a43;
+      cursor: pointer;
+    }
+    .fx-btn.active {
+      background: var(--ink);
+      color: #fff;
+      border-color: transparent;
+    }
+    body.dark .fx-btn {
+      background: #1f2937;
+      color: #f8fafc;
+    }
+    body.dark .fx-btn.active {
+      background: #06d6a0;
+      color: #082f49;
+    }
+    .page {
+      min-height: 280vh;
+      padding: 248px 18px 40px;
+    }
+    .hero {
+      text-align: center;
+      position: sticky;
+      top: 62px;
+      z-index: 2;
+      margin-bottom: 20px;
+    }
+    .sun {
+      margin: 0;
+      font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
+      letter-spacing: 0.03em;
+      line-height: 0.92;
+      transition: text-shadow 80ms linear;
+    }
+    .sun.main { font-size: clamp(2.2rem, 8vw, 6rem); }
+    .sun.sub { font-size: clamp(1rem, 2.8vw, 1.8rem); }
+    .arena {
+      width: min(1200px, 96vw);
+      margin: 22px auto;
+      background: var(--panel);
+      border: 1px solid #00000022;
+      border-radius: 20px;
+      min-height: 68vh;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px #0000001e;
+      transform-origin: center top;
+    }
+    .floating {
+      position: absolute;
+      width: 88px;
+      height: 88px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      user-select: none;
+      touch-action: none;
+      cursor: grab;
+      border: 2px solid #0000002d;
+      color: #0b132b;
+      z-index: 1;
+    }
+    .floating.drop {
+      transform: translateY(120vh) rotate(25deg) !important;
+      opacity: 0;
+      transition: transform 700ms ease, opacity 700ms ease;
+    }
+    .gallery {
+      width: min(1200px, 96vw);
+      margin: 18px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .img-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 14px;
+      border: 2px solid #00000030;
+    }
+    .img-wrap img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      filter: grayscale(1) contrast(1.1);
+      transition: filter 250ms, transform 250ms;
+    }
+    body.fx-15 .img-wrap:hover img {
+      filter: invert(0.1) saturate(1.9) hue-rotate(130deg) contrast(1.35);
+      transform: scale(1.03);
+    }
+    .img-wrap::before,
+    .img-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+    .img-wrap::before { background: #ff006e50; }
+    .img-wrap::after { background: #00d9ff50; }
+    body.fx-7 .img-wrap:hover::before,
+    body.fx-7 .img-wrap:hover::after {
+      opacity: 1;
+      animation: slice 180ms steps(2) infinite;
+    }
+    body.fx-7 .img-wrap:hover::after { animation-direction: reverse; }
+    body.fx-7 .img-wrap:hover img {
+      animation: jitter 180ms steps(2) infinite;
+    }
+    .typing {
+      width: min(1200px, 96vw);
+      margin: 14px auto;
+      background: var(--panel);
+      border-radius: 16px;
+      border: 1px solid #00000024;
+      padding: 14px;
+    }
+    #typeInput {
+      width: 100%;
+      padding: 10px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: 1px solid #00000035;
+    }
+    #ghost {
+      min-height: 84px;
+      margin-top: 10px;
+      font-size: 30px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(14px);
+      animation: rise 330ms ease forwards;
+    }
+    body.erase .erasable:hover {
+      opacity: 0.04;
+    }
+    .sticker, .boom, .splash {
+      position: absolute;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 8;
+    }
+    .sticker {
+      font-size: 42px;
+      filter: drop-shadow(0 6px 8px #00000033);
+    }
+    .boom {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .splash {
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      opacity: 0.72;
+    }
+    @keyframes rise {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes jitter {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-2px, 1px); }
+      50% { transform: translate(2px, -1px); }
+      75% { transform: translate(-1px, -2px); }
+      100% { transform: translate(0, 0); }
+    }
+    @keyframes slice {
+      0% { clip-path: inset(0 0 80% 0); transform: translateX(-2px); }
+      40% { clip-path: inset(30% 0 40% 0); transform: translateX(3px); }
+      80% { clip-path: inset(70% 0 5% 0); transform: translateX(-3px); }
+      100% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="trail"></canvas>
+  <div id="fx"></div>
+  <div class="cursor" id="cursor"></div>
+
+  <div class="hud">
+    <div class="chip" id="status">Chaos score: 0</div>
+    <button class="magnet" id="themeBtn">Theme + Click</button>
+    <button class="magnet" id="eraserBtn">Eraser Mode</button>
+    <button class="magnet" id="resetBtn">Reset Objects</button>
+    <div class="chip">Shake mouse quickly to drop all blocks</div>
+  </div>
+
+  <section class="control-panel" id="controls">
+    <button class="fx-btn active" data-fx="1">01 Cursor Trail</button>
+    <button class="fx-btn active" data-fx="2">02 Magnetic Buttons</button>
+    <button class="fx-btn active" data-fx="3">03 Dynamic Background</button>
+    <button class="fx-btn active" data-fx="4">04 Click Explode</button>
+    <button class="fx-btn active" data-fx="5">05 Scroll Scaling</button>
+    <button class="fx-btn active" data-fx="6">06 Theme+Sound</button>
+    <button class="fx-btn active" data-fx="7">07 Hover Glitch</button>
+    <button class="fx-btn active" data-fx="8">08 Shake To Clear</button>
+    <button class="fx-btn active" data-fx="9">09 Custom Cursor</button>
+    <button class="fx-btn active" data-fx="10">10 Typing Ghost</button>
+    <button class="fx-btn active" data-fx="11">11 Sticker Slap</button>
+    <button class="fx-btn active" data-fx="12">12 Color Splash</button>
+    <button class="fx-btn active" data-fx="13">13 Drag Physics</button>
+    <button class="fx-btn active" data-fx="14">14 Auto Rotation</button>
+    <button class="fx-btn active" data-fx="15">15 Filter Swap</button>
+    <button class="fx-btn active" data-fx="16">16 Text Shadow</button>
+    <button class="fx-btn active" data-fx="17">17 Z-Index Shuffle</button>
+    <button class="fx-btn active" data-fx="18">18 Eraser Mode</button>
+    <button class="fx-btn active" data-fx="19">19 Key Sound</button>
+    <button class="fx-btn active" data-fx="20">20 Edge Warp</button>
+  </section>
+
+  <div class="page">
+    <header class="hero">
+      <h1 class="sun main">CHAOS PLAYGROUND</h1>
+      <h2 class="sun sub">20 mechanics in one game-like page</h2>
+    </header>
+
+    <section class="arena erasable" id="arena"></section>
+
+    <section class="gallery erasable">
+      <div class="img-wrap"><img src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=1300&q=80" alt="img1" /></div>
+      <div class="img-wrap"><img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1300&q=80" alt="img2" /></div>
+      <div class="img-wrap"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1300&q=80" alt="img3" /></div>
+      <div class="img-wrap"><img src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1300&q=80" alt="img4" /></div>
+    </section>
+
+    <section class="typing erasable">
+      <input id="typeInput" placeholder="Type here: letters appear with delay + every key plays a random blip" />
+      <div id="ghost"></div>
+    </section>
+  </div>
+
+  <script>
+    const body = document.body;
+    const fx = document.getElementById("fx");
+    const arena = document.getElementById("arena");
+    const cursor = document.getElementById("cursor");
+    const status = document.getElementById("status");
+    const themeBtn = document.getElementById("themeBtn");
+    const eraserBtn = document.getElementById("eraserBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const controls = document.getElementById("controls");
+    const typeInput = document.getElementById("typeInput");
+    const ghost = document.getElementById("ghost");
+    const suns = [...document.querySelectorAll(".sun")];
+    const magnets = [...document.querySelectorAll(".magnet")];
+    const fxButtons = [...document.querySelectorAll(".fx-btn")];
+
+    const fxEnabled = {};
+    for (let i = 1; i <= 20; i += 1) fxEnabled[i] = true;
+    function isOn(id) {
+      return !!fxEnabled[id];
+    }
+    function applyFxClasses() {
+      body.classList.toggle("fx-7", isOn(7));
+      body.classList.toggle("fx-15", isOn(15));
+      body.style.cursor = isOn(9) ? "none" : "default";
+      cursor.style.display = isOn(9) ? "block" : "none";
+      if (!isOn(18)) {
+        body.classList.remove("erase");
+        eraserBtn.textContent = "Eraser Mode";
+      }
+      if (!isOn(16)) {
+        suns.forEach((s) => {
+          s.style.textShadow = "none";
+        });
+      }
+      if (!isOn(3)) {
+        body.style.background = "linear-gradient(120deg, var(--bg-a), var(--bg-b))";
+      }
+      if (!isOn(5)) {
+        arena.style.transform = "scale(1)";
+      }
+      if (!isOn(1)) {
+        tctx.clearRect(0, 0, trail.width, trail.height);
+      }
+    }
+
+    controls.addEventListener("click", (e) => {
+      const btn = e.target.closest(".fx-btn");
+      if (!btn) return;
+      const id = Number(btn.dataset.fx);
+      fxEnabled[id] = !fxEnabled[id];
+      btn.classList.toggle("active", fxEnabled[id]);
+      applyFxClasses();
+    });
+
+    let score = 0;
+    let zTop = 3;
+    let audioCtx;
+    let splash = null;
+    let splashSize = 0;
+    let lastX = innerWidth / 2;
+    let lastY = innerHeight / 2;
+    let shakeDir = 0;
+    let shakeScore = 0;
+    let shakeTime = performance.now();
+
+    // Cursor trail canvas
+    const trail = document.getElementById("trail");
+    const tctx = trail.getContext("2d");
+    const sparks = [];
+    function fitTrail() {
+      trail.width = innerWidth;
+      trail.height = innerHeight;
+    }
+    fitTrail();
+    addEventListener("resize", fitTrail);
+    applyFxClasses();
+
+    function beep(min = 220, max = 900, len = 0.12) {
+      audioCtx = audioCtx || new AudioContext();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const types = ["sine", "triangle", "square", "sawtooth"];
+      osc.type = types[Math.floor(Math.random() * types.length)];
+      const freq = min + Math.random() * (max - min);
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.15, audioCtx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + len);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + len + 0.01);
+    }
+
+    function setScore(delta) {
+      score += delta;
+      status.textContent = `Chaos score: ${score}`;
+    }
+
+    // 13/14/17/20: draggable inertial objects with rotation, z-index shuffle, edge warp
+    const objects = [];
+    const labels = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+    function spawnObjects() {
+      arena.innerHTML = "";
+      objects.length = 0;
+      const colors = ["#ffd166", "#06d6a0", "#118ab2", "#ef476f", "#f4a261", "#8ecae6"];
+      for (let i = 0; i < 10; i += 1) {
+        const el = document.createElement("div");
+        el.className = "floating erasable";
+        el.textContent = labels[i % labels.length];
+        el.style.background = colors[i % colors.length];
+        const x = 30 + Math.random() * (arena.clientWidth - 120);
+        const y = 30 + Math.random() * (arena.clientHeight - 120);
+        const obj = {
+          el,
+          x,
+          y,
+          tx: x,
+          ty: y,
+          drag: false,
+          ox: 0,
+          oy: 0,
+          rot: Math.random() * 360,
+          speed: (Math.random() - 0.5) * 0.8,
+        };
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.style.zIndex = `${1 + i}`;
+        arena.appendChild(el);
+        objects.push(obj);
+
+        el.addEventListener("pointerdown", (e) => {
+          if (!isOn(13)) return;
+          obj.drag = true;
+          obj.ox = e.clientX - obj.tx - arena.getBoundingClientRect().left;
+          obj.oy = e.clientY - obj.ty - arena.getBoundingClientRect().top;
+          if (isOn(17)) {
+            zTop += 1;
+            el.style.zIndex = `${zTop}`;
+          }
+          el.style.cursor = "grabbing";
+          el.setPointerCapture(e.pointerId);
+          setScore(1);
+        });
+        el.addEventListener("pointermove", (e) => {
+          if (!isOn(13)) return;
+          if (!obj.drag) return;
+          const r = arena.getBoundingClientRect();
+          obj.tx = e.clientX - r.left - obj.ox;
+          obj.ty = e.clientY - r.top - obj.oy;
+
+          const maxX = arena.clientWidth - 88;
+          const maxY = arena.clientHeight - 88;
+          if (isOn(20)) {
+            if (obj.tx < -88) obj.tx = maxX;
+            if (obj.tx > maxX + 88) obj.tx = 0;
+            if (obj.ty < -88) obj.ty = maxY;
+            if (obj.ty > maxY + 88) obj.ty = 0;
+          }
+        });
+        el.addEventListener("pointerup", () => {
+          obj.drag = false;
+          el.style.cursor = "grab";
+        });
+      }
+    }
+    spawnObjects();
+
+    // 10 + 19 typing ghost + key sounds
+    typeInput.addEventListener("input", () => {
+      if (!isOn(10)) {
+        ghost.textContent = typeInput.value;
+        return;
+      }
+      const text = typeInput.value;
+      ghost.textContent = "";
+      [...text].forEach((ch, i) => {
+        setTimeout(() => {
+          if (!isOn(10)) return;
+          const span = document.createElement("span");
+          span.className = "char";
+          span.textContent = ch;
+          ghost.appendChild(span);
+        }, 70 * i + 100);
+      });
+    });
+    addEventListener("keydown", () => {
+      if (isOn(19)) beep(180, 1200, 0.1);
+    });
+
+    // 6 theme toggle with click sound
+    themeBtn.addEventListener("click", () => {
+      if (!isOn(6)) return;
+      body.classList.toggle("dark");
+      beep(320, 620, 0.12);
+      setScore(2);
+    });
+
+    // 18 eraser mode
+    eraserBtn.addEventListener("click", () => {
+      if (!isOn(18)) return;
+      body.classList.toggle("erase");
+      eraserBtn.textContent = body.classList.contains("erase") ? "Eraser: ON" : "Eraser Mode";
+      setScore(1);
+    });
+
+    resetBtn.addEventListener("click", () => {
+      spawnObjects();
+      setScore(-Math.min(10, score));
+    });
+
+    // 1 + 3 + 9 + 16 + 2 + 8 mouse move mechanics
+    addEventListener("mousemove", (e) => {
+      const x = e.clientX / innerWidth;
+      const y = e.clientY / innerHeight;
+
+      if (isOn(3)) {
+        const c1 = `rgb(${Math.round(255 - 150 * x)}, ${Math.round(90 + 120 * y)}, ${Math.round(120 + 100 * x)})`;
+        const c2 = `rgb(${Math.round(80 + 130 * y)}, ${Math.round(220 - 130 * x)}, ${Math.round(180 + 50 * y)})`;
+        body.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, #ffffff55, transparent 38%), linear-gradient(120deg, ${c1}, ${c2})`;
+      }
+
+      // Custom rotating cursor.
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+      if (isOn(9)) {
+        cursor.style.left = `${e.clientX - 13}px`;
+        cursor.style.top = `${e.clientY - 13}px`;
+        cursor.style.transform = `rotate(${angle + 45}deg)`;
+      }
+
+      // Text shadow follows opposite to cursor.
+      if (isOn(16)) {
+        const cx = innerWidth / 2;
+        const cy = innerHeight / 2;
+        const sx = (e.clientX - cx) / 34;
+        const sy = (e.clientY - cy) / 34;
+        suns.forEach((s, i) => {
+          const m = 1 + i * 0.6;
+          s.style.textShadow = `${-sx * m}px ${-sy * m}px 0 #00000066`;
+        });
+      }
+
+      // Magnetic buttons.
+      if (isOn(2)) {
+        magnets.forEach((btn) => {
+          const rect = btn.getBoundingClientRect();
+          const mx = rect.left + rect.width / 2;
+          const my = rect.top + rect.height / 2;
+          const bdx = e.clientX - mx;
+          const bdy = e.clientY - my;
+          const dist = Math.hypot(bdx, bdy);
+          if (dist < 130) {
+            const strength = (1 - dist / 130) * 20;
+            const a = Math.atan2(bdy, bdx);
+            btn.style.transform = `translate(${Math.cos(a) * strength}px, ${Math.sin(a) * strength}px)`;
+          } else {
+            btn.style.transform = "translate(0,0)";
+          }
+        });
+      }
+
+      // Cursor sparks
+      if (isOn(1)) {
+        for (let i = 0; i < 3; i += 1) {
+          sparks.push({
+            x: e.clientX,
+            y: e.clientY,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+            life: 1,
+            size: 2 + Math.random() * 6,
+            square: Math.random() > 0.5,
+            hue: 180 + Math.random() * 140,
+          });
+        }
+      }
+
+      // Shake to clear detection.
+      if (isOn(8)) {
+        const now = performance.now();
+        const dt = now - shakeTime || 16;
+        const velX = (e.clientX - lastX) / dt;
+        const nextDir = Math.sign(velX);
+        if (Math.abs(velX) > 1.8 && nextDir !== 0 && nextDir !== shakeDir) {
+          shakeScore += 1;
+        } else {
+          shakeScore = Math.max(0, shakeScore - 0.2);
+        }
+        if (shakeScore > 12) {
+          document.querySelectorAll(".floating").forEach((n) => n.classList.add("drop"));
+          setScore(5);
+          shakeScore = -9999;
+        }
+        shakeDir = nextDir;
+        shakeTime = now;
+      }
+      lastX = e.clientX;
+      lastY = e.clientY;
+    });
+
+    // 4 + 11 click explosions + stickers
+    const stickers = ["⭐", "🔥", "💥", "⚡", "🎯", "🎉", "🌀"];
+    addEventListener("click", (e) => {
+      if (e.target.closest("button") || e.target.closest("input")) return;
+
+      if (isOn(11)) {
+        const st = document.createElement("div");
+        st.className = "sticker";
+        st.textContent = stickers[Math.floor(Math.random() * stickers.length)];
+        st.style.left = `${e.clientX}px`;
+        st.style.top = `${e.clientY}px`;
+        st.style.transform = `translate(-50%, -50%) rotate(${(Math.random() - 0.5) * 80}deg) scale(${0.9 + Math.random() * 0.6})`;
+        fx.appendChild(st);
+        setTimeout(() => st.remove(), 9000);
+      }
+
+      if (isOn(4)) {
+        for (let i = 0; i < 24; i += 1) {
+          const p = document.createElement("div");
+          p.className = "boom";
+          p.style.left = `${e.clientX}px`;
+          p.style.top = `${e.clientY}px`;
+          p.style.background = `hsl(${Math.random() * 360} 95% 60%)`;
+          fx.appendChild(p);
+
+          const a = (Math.PI * 2 * i) / 24;
+          const v = 40 + Math.random() * 120;
+          const tx = Math.cos(a) * v;
+          const ty = Math.sin(a) * v;
+          p.animate(
+            [
+              { transform: "translate(-50%, -50%) scale(1)", opacity: 1 },
+              { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0.2)`, opacity: 0 },
+            ],
+            { duration: 600, easing: "cubic-bezier(.22,.61,.36,1)" }
+          );
+          setTimeout(() => p.remove(), 620);
+        }
+      }
+      if (isOn(4) || isOn(11)) setScore(1);
+    });
+
+    // 12 color splash on hold
+    addEventListener("mousedown", (e) => {
+      if (!isOn(12)) return;
+      splash = document.createElement("div");
+      splash.className = "splash";
+      splash.style.left = `${e.clientX}px`;
+      splash.style.top = `${e.clientY}px`;
+      splash.style.width = "0px";
+      splash.style.height = "0px";
+      splash.style.background = `radial-gradient(circle, hsl(${Math.random() * 360} 100% 68%), transparent 70%)`;
+      fx.appendChild(splash);
+      splashSize = 10;
+    });
+    addEventListener("mouseup", () => {
+      if (!isOn(12)) return;
+      if (!splash) return;
+      const done = splash;
+      done.style.transition = "opacity 350ms";
+      done.style.opacity = "0";
+      setTimeout(() => done.remove(), 400);
+      splash = null;
+    });
+
+    // 5 scroll-driven scaling
+    function onScroll() {
+      if (!isOn(5)) {
+        arena.style.transform = "scale(1)";
+        return;
+      }
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const p = max > 0 ? scrollY / max : 0;
+      const s = 0.82 + p * 0.8;
+      arena.style.transform = `scale(${s})`;
+    }
+    addEventListener("scroll", onScroll, { passive: true });
+
+    // Main animation loop: trails + inertial drag + auto-rotation + splash growth
+    function frame() {
+      if (isOn(1)) {
+        tctx.fillStyle = "rgba(0,0,0,0.12)";
+        tctx.fillRect(0, 0, trail.width, trail.height);
+      }
+
+      for (let i = sparks.length - 1; i >= 0; i -= 1) {
+        const s = sparks[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        s.vy += 0.015;
+        s.life -= 0.025;
+
+        if (isOn(1)) {
+          tctx.globalAlpha = Math.max(0, s.life);
+          tctx.fillStyle = `hsl(${s.hue} 95% 65%)`;
+          if (s.square) {
+            tctx.fillRect(s.x, s.y, s.size, s.size);
+          } else {
+            tctx.beginPath();
+            tctx.arc(s.x, s.y, s.size * 0.5, 0, Math.PI * 2);
+            tctx.fill();
+          }
+        }
+        if (s.life <= 0) sparks.splice(i, 1);
+      }
+      tctx.globalAlpha = 1;
+
+      objects.forEach((o) => {
+        if (isOn(13)) {
+          o.x += (o.tx - o.x) * 0.15;
+          o.y += (o.ty - o.y) * 0.15;
+        }
+        if (isOn(14)) {
+          o.rot += o.speed;
+        }
+        o.el.style.left = `${o.x}px`;
+        o.el.style.top = `${o.y}px`;
+        if (!o.el.classList.contains("drop")) {
+          o.el.style.transform = isOn(14) ? `rotate(${o.rot}deg)` : "rotate(0deg)";
+        }
+      });
+
+      if (isOn(12) && splash) {
+        splashSize = Math.min(560, splashSize + 16);
+        splash.style.width = `${splashSize}px`;
+        splash.style.height = `${splashSize}px`;
+      }
+
+      requestAnimationFrame(frame);
+    }
+    onScroll();
+    frame();
+  </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DrawApp - Canvas Drawing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Righteous&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="app-header">
+      <div class="logo" aria-label="StarDraw logo">
+        <span class="logo-star" aria-hidden="true">✦</span>
+        <h1>StarDraw</h1>
+      </div>
+      <p>Draw on the canvas with any colors</p>
+    </header>
+
+    <section class="toolbar" aria-label="Drawing toolbar">
+      <label class="tool-group brush-size" for="brushSize">
+        Brush size: <span id="brushSizeValue">6</span>px
+        <input type="range" id="brushSize" min="1" max="30" value="6">
+      </label>
+
+      <button id="eyedropperBtn" class="tool-btn" type="button">Eyedropper</button>
+      <button id="saveBtn" class="save-btn">Save to Gallery</button>
+      <button id="clearBtn" class="clear-btn">Clear Canvas</button>
+    </section>
+
+    <section class="studio" aria-label="Workspace">
+      <section class="canvas-wrap">
+        <canvas id="drawingCanvas" aria-label="Drawing canvas"></canvas>
+      </section>
+
+      <aside class="sidebar" aria-label="Tool panels">
+        <section class="panel panel-layers" aria-label="Layers">
+          <div class="panel-head">
+            <h2 id="layerCountTitle">LAYERS (1)</h2>
+            <button class="mini-btn" type="button">FILTERS</button>
+          </div>
+
+          <div class="layer-actions">
+            <button id="addLayerBtn" class="layer-btn" type="button">+ Layer</button>
+            <button id="layerUpBtn" class="layer-btn" type="button">Up</button>
+            <button id="layerDownBtn" class="layer-btn" type="button">Down</button>
+            <button id="deleteLayerBtn" class="layer-btn danger" type="button">Delete</button>
+          </div>
+
+          <div id="layerList" class="layer-list" role="listbox" aria-label="Layer list"></div>
+
+          <label class="opacity-control" for="layerOpacity">
+            <span id="layerOpacityValue">100%</span>
+            <input id="layerOpacity" type="range" min="0" max="100" value="100">
+          </label>
+        </section>
+
+        <section class="panel panel-colors" aria-label="Color palette">
+          <div class="panel-head">
+            <h2>PALETTE</h2>
+          </div>
+          <div class="colors" role="group" aria-label="Color picker">
+            <button class="color-btn active" data-color="#ffffff" style="--swatch:#ffffff" aria-label="White"></button>
+            <button class="color-btn" data-color="#111827" style="--swatch:#111827" aria-label="Black"></button>
+            <button class="color-btn" data-color="#ef4444" style="--swatch:#ef4444" aria-label="Red"></button>
+            <button class="color-btn" data-color="#f59e0b" style="--swatch:#f59e0b" aria-label="Orange"></button>
+            <button class="color-btn" data-color="#22c55e" style="--swatch:#22c55e" aria-label="Green"></button>
+            <button class="color-btn" data-color="#3b82f6" style="--swatch:#3b82f6" aria-label="Blue"></button>
+            <button class="color-btn" data-color="#a855f7" style="--swatch:#a855f7" aria-label="Violet"></button>
+            <button class="color-btn" data-color="#f472b6" style="--swatch:#f472b6" aria-label="Pink"></button>
+            <button class="color-btn" data-color="#06b6d4" style="--swatch:#06b6d4" aria-label="Turquoise"></button>
+            <button class="color-btn" data-color="#fde047" style="--swatch:#fde047" aria-label="Yellow"></button>
+          </div>
+          <div class="wheel-wrap">
+            <p>Custom rainbow wheel</p>
+            <div class="wheel-picker" aria-label="Rainbow color wheel picker">
+              <canvas id="colorWheel" width="180" height="180"></canvas>
+              <span id="colorWheelMarker" class="wheel-marker" aria-hidden="true"></span>
+            </div>
+            <div id="customColorPreview" class="custom-color-preview" aria-label="Selected custom color"></div>
+          </div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="gallery-section" aria-label="Drawing gallery">
+      <div class="gallery-header">
+        <h2>Gallery</h2>
+        <p id="galleryEmpty">No saved drawings yet</p>
+      </div>
+      <div id="gallery" class="gallery"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

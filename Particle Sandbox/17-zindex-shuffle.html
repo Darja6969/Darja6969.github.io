@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>17 Z Index Shuffle</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #ecfeff;
+      font-family: "Segoe UI", sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+    .card {
+      position: absolute;
+      width: 220px;
+      height: 140px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #082f49;
+      cursor: pointer;
+      user-select: none;
+      border: 2px solid #0e7490;
+      box-shadow: 0 12px 24px #0e749033;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    const colors = ["#a5f3fc", "#bae6fd", "#99f6e4", "#ccfbf1", "#e0f2fe"];
+    let topZ = 1;
+
+    for (let i = 0; i < 8; i += 1) {
+      const c = document.createElement("div");
+      c.className = "card";
+      c.textContent = `Layer ${i + 1}`;
+      c.style.background = colors[i % colors.length];
+      c.style.left = `${40 + Math.random() * (innerWidth - 280)}px`;
+      c.style.top = `${40 + Math.random() * (innerHeight - 200)}px`;
+      c.style.transform = `rotate(${(Math.random() - 0.5) * 20}deg)`;
+      c.style.zIndex = topZ;
+      c.addEventListener("click", () => {
+        topZ += 1;
+        c.style.zIndex = topZ;
+      });
+      document.body.appendChild(c);
+    }
+  </script>
+</body>
+</html>

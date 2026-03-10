@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>08 Shake To Clear</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #ecfccb, #d9f99d 38%, #bbf7d0);
+      font-family: "Gill Sans", "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+    .item {
+      position: absolute;
+      width: 120px;
+      height: 70px;
+      border-radius: 12px;
+      background: #14532d;
+      color: #f0fdf4;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 10px 18px #14532d44;
+      transition: transform 500ms ease, opacity 500ms ease;
+      user-select: none;
+    }
+    .drop {
+      transform: translateY(120vh) rotate(30deg);
+      opacity: 0;
+    }
+    .info {
+      position: fixed;
+      top: 10px;
+      left: 12px;
+      background: #14532dcc;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="info">Shake mouse left/right quickly to clear</div>
+
+  <script>
+    const labels = ["Box", "Node", "Card", "Tile", "Layer", "Spark", "Blob", "Tag"];
+    for (let i = 0; i < 24; i += 1) {
+      const d = document.createElement("div");
+      d.className = "item";
+      d.textContent = labels[i % labels.length];
+      d.style.left = `${Math.random() * (innerWidth - 130)}px`;
+      d.style.top = `${60 + Math.random() * (innerHeight - 160)}px`;
+      d.style.transform = `rotate(${(Math.random() - 0.5) * 20}deg)`;
+      document.body.appendChild(d);
+    }
+
+    let lastX = 0;
+    let lastTime = performance.now();
+    let score = 0;
+    let dir = 0;
+
+    addEventListener("mousemove", (e) => {
+      const now = performance.now();
+      const dx = e.clientX - lastX;
+      const dt = now - lastTime || 16;
+      const speed = Math.abs(dx / dt);
+      const nextDir = Math.sign(dx);
+
+      if (speed > 1.8 && nextDir !== 0 && nextDir !== dir) {
+        score += 1;
+      } else {
+        score = Math.max(0, score - 0.2);
+      }
+
+      if (score > 14) {
+        document.querySelectorAll(".item").forEach((n) => n.classList.add("drop"));
+        score = -9999;
+      }
+
+      dir = nextDir;
+      lastX = e.clientX;
+      lastTime = now;
+    });
+  </script>
+</body>
+</html>
