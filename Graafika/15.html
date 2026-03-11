@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>15 Hover Filter Swap</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f1faee;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+    .img {
+      width: min(86vw, 620px);
+      aspect-ratio: 16 / 9;
+      border-radius: 16px;
+      background: radial-gradient(circle at 30% 30%, #ffd166, #ef476f 45%, #073b4c);
+      filter: grayscale(1) contrast(1.2);
+      transition: filter 320ms ease, transform 260ms ease;
+      box-shadow: 0 16px 30px #00000033;
+    }
+    .img:hover {
+      filter: saturate(2.2) hue-rotate(150deg) invert(0.1);
+      transform: scale(1.03);
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <div class="img" title="Hover filter swap"></div>
+  <script src="nav.js"></script>
+</body>
+</html>

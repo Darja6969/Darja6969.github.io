@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>17 Z-Index Shuffle</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #22223b;
+      font-family: "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+    .layer {
+      position: absolute;
+      width: 220px;
+      height: 140px;
+      border-radius: 14px;
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 10px 20px #0000004a;
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <script>
+    const colors = ['#ef476f', '#06d6a0', '#118ab2', '#ffd166', '#8338ec'];
+    let topZ = 1;
+    for (let i = 0; i < 8; i += 1) {
+      const d = document.createElement('div');
+      d.className = 'layer';
+      d.textContent = `Layer ${i + 1}`;
+      d.style.background = colors[i % colors.length];
+      d.style.left = `${50 + Math.random() * (innerWidth - 280)}px`;
+      d.style.top = `${40 + Math.random() * (innerHeight - 200)}px`;
+      d.style.zIndex = String(i + 1);
+      d.addEventListener('click', () => {
+        topZ += 1;
+        d.style.zIndex = String(topZ);
+      });
+      document.body.appendChild(d);
+    }
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

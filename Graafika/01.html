@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>01 Cursor Trail</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #101521;
+      color: #dce9ff;
+      font-family: "Verdana", sans-serif;
+      height: 100vh;
+    }
+    .note { position: fixed; top: 12px; left: 14px; opacity: 0.8; }
+    .spark {
+      position: fixed;
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      animation: fade 700ms linear forwards;
+    }
+    @keyframes fade {
+      from { transform: scale(1) rotate(0deg); opacity: 1; }
+      to { transform: scale(0) rotate(160deg); opacity: 0; }
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <div class="note">Liiguta hiirt: jarele jaavad geomeetrilised satemed.</div>
+  <script>
+    const colors = ['#42f5c8', '#7ab8ff', '#f8ff6c', '#ff6fd8'];
+    window.addEventListener('pointermove', (event) => {
+      const p = document.createElement('div');
+      p.className = 'spark';
+      p.style.left = `${event.clientX - 7}px`;
+      p.style.top = `${event.clientY - 7}px`;
+      p.style.background = colors[(Math.random() * colors.length) | 0];
+      p.style.transform = `rotate(${Math.random() * 180}deg)`;
+      document.body.appendChild(p);
+      p.addEventListener('animationend', () => p.remove());
+    });
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

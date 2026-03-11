@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>11 Sticker Slap</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(160deg, #edf6f9, #d8f3dc);
+      font-family: "Comic Sans MS", cursive;
+    }
+    .hint { position: fixed; top: 8px; left: 10px; }
+    .sticker {
+      position: fixed;
+      width: 72px;
+      height: 72px;
+      border-radius: 14px;
+      background: white;
+      display: grid;
+      place-items: center;
+      font-size: 36px;
+      box-shadow: 0 8px 18px #0000002a;
+      user-select: none;
+      animation: pop 220ms ease;
+    }
+    @keyframes pop {
+      from { transform: scale(0.4) rotate(-20deg); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <div class="hint">Kliki ja lisa juhuslik kleebis.</div>
+  <script>
+    const stickers = ['⭐', '🍉', '⚡', '🌈', '🎯', '🌀'];
+    addEventListener('click', (event) => {
+      const s = document.createElement('div');
+      s.className = 'sticker';
+      s.textContent = stickers[(Math.random() * stickers.length) | 0];
+      s.style.left = `${event.clientX - 36}px`;
+      s.style.top = `${event.clientY - 36}px`;
+      s.style.transform = `rotate(${Math.random() * 80 - 40}deg)`;
+      document.body.appendChild(s);
+    });
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

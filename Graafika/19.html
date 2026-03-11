@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>19 Key-Sound Piano</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #0f0f1a;
+      color: #e7e7ff;
+      font-family: "Consolas", monospace;
+      padding: 20px;
+    }
+    .panel {
+      width: min(90vw, 700px);
+      background: #17172a;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 14px 28px #00000044;
+    }
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      border: 1px solid #333759;
+      background: #0d1020;
+      color: #e7e7ff;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 18px;
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <div class="panel">
+    <h2>Type to hear random short tones</h2>
+    <textarea id="ta" placeholder="Alusta trukkimist..."></textarea>
+  </div>
+  <script>
+    const ta = document.getElementById('ta');
+    let ctx;
+    function beep() {
+      ctx = ctx || new AudioContext();
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const freqs = [220, 247, 262, 294, 330, 392, 440, 494, 523, 659];
+      osc.type = ['square', 'triangle', 'sine'][(Math.random() * 3) | 0];
+      osc.frequency.value = freqs[(Math.random() * freqs.length) | 0] * (0.9 + Math.random() * 0.3);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.09, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.16);
+    }
+    ta.addEventListener('keydown', beep);
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

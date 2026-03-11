@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>18 Eraser Mode</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(130deg, #ffb703, #fb8500 35%, #219ebc);
+      overflow: hidden;
+      font-family: "Verdana", sans-serif;
+    }
+    .tile {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 10px;
+      background: #ffffffcf;
+      border: 1px solid #0000001f;
+      transition: opacity 220ms;
+    }
+    .tile.erased { opacity: 0.06; }
+    button {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <button id="mode">Eraser: ON</button>
+  <script>
+    let eraser = true;
+    const modeBtn = document.getElementById('mode');
+    modeBtn.addEventListener('click', () => {
+      eraser = !eraser;
+      modeBtn.textContent = `Eraser: ${eraser ? 'ON' : 'OFF'}`;
+    });
+    for (let y = 80; y < innerHeight; y += 98) {
+      for (let x = 20; x < innerWidth; x += 98) {
+        const t = document.createElement('div');
+        t.className = 'tile';
+        t.style.left = `${x}px`;
+        t.style.top = `${y}px`;
+        t.addEventListener('pointerenter', () => {
+          if (eraser) t.classList.add('erased');
+        });
+        document.body.appendChild(t);
+      }
+    }
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

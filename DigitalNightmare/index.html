@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Nightmare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg0: #08120f;
+      --bg1: #10231d;
+      --bg2: #17342a;
+      --ink: #d8ffef;
+      --muted: #8db5a6;
+      --accent: #34f5b6;
+      --accent2: #ff5a5a;
+      --panel: rgba(7, 18, 14, 0.86);
+      --line: rgba(61, 162, 132, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Space Mono", monospace;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, rgba(89, 255, 186, 0.14), transparent 65%),
+        radial-gradient(800px 500px at 110% 20%, rgba(255, 99, 99, 0.13), transparent 70%),
+        linear-gradient(150deg, var(--bg0), var(--bg1) 45%, var(--bg2));
+      display: grid;
+      grid-template-columns: minmax(280px, 420px) 1fr;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+      animation: panelIn 0.55s ease;
+    }
+
+    .controls {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(1.2rem, 2.3vw, 1.8rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .sub {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button,
+    input[type="file"]::file-selector-button,
+    select {
+      background: #0e2b22;
+      color: var(--ink);
+      border: 1px solid #2d6f5b;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover,
+    input[type="file"]::file-selector-button:hover,
+    select:hover {
+      background: #174136;
+      transform: translateY(-1px);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      color: var(--muted);
+    }
+
+    .group {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      animation: rise 0.5s ease;
+    }
+
+    .group h2 {
+      margin: 0;
+      font-size: 0.9rem;
+      font-family: "Orbitron", sans-serif;
+      letter-spacing: 0.05em;
+      color: #96fcd7;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    label span {
+      color: var(--muted);
+      flex: 1;
+    }
+
+    input[type="range"] {
+      width: 120px;
+    }
+
+    .hint {
+      color: #b4ddce;
+      font-size: 0.75rem;
+      line-height: 1.4;
+      opacity: 0.9;
+    }
+
+    .viewer {
+      position: relative;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      min-height: 60vh;
+    }
+
+    canvas {
+      width: min(100%, 1100px);
+      aspect-ratio: 16 / 9;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #050b09;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+      animation: glowIn 0.7s ease;
+    }
+
+    .badge {
+      position: absolute;
+      right: 28px;
+      top: 28px;
+      background: rgba(1, 18, 12, 0.7);
+      border: 1px solid #2f8169;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.74rem;
+      color: #adf5d8;
+      font-family: "Orbitron", sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .status {
+      font-size: 0.8rem;
+      color: #cdf8e4;
+      background: rgba(8, 28, 22, 0.8);
+      border: 1px solid #2c7460;
+      border-radius: 10px;
+      padding: 8px;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        grid-template-columns: 1fr;
+      }
+
+      .viewer {
+        min-height: auto;
+      }
+    }
+
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glowIn {
+      from { opacity: 0; filter: blur(6px); }
+      to { opacity: 1; filter: blur(0); }
+    }
+  </style>
+</head>
+<body>
+  <aside class="panel controls">
+    <div>
+      <h1>Digital Nightmare</h1>
+      <p class="sub">Küberpungi-pudru generaator ühel lehel.</p>
+    </div>
+
+    <div class="row">
+      <button id="startCamera">Kaamera ON</button>
+      <button id="stopCamera">Kaamera OFF</button>
+      <button id="enableMic">Mikrofon ON</button>
+      <button id="toggleShake">Scream Shake OFF</button>
+      <button id="saveChaos">Chaos Save</button>
+    </div>
+
+    <input id="upload" type="file" accept="image/*" />
+
+    <div class="group">
+      <h2>Põhiseaded</h2>
+      <label><span>Peegel-sektorid</span>
+        <select id="mirrorSectors">
+          <option value="4">4 sektorit</option>
+          <option value="8">8 sektorit</option>
+        </select>
+      </label>
+      <label><span>ASCII mode</span><input id="asciiMode" type="checkbox" /></label>
+      <label><span>RGB Split tugevus</span><input id="rgbStrength" type="range" min="0" max="35" value="14" /></label>
+      <label><span>Datamosh segunemine</span><input id="moshStrength" type="range" min="0" max="1" step="0.01" value="0.35" /></label>
+      <label><span>Audio moonutus</span><input id="audioStrength" type="range" min="0" max="60" value="25" /></label>
+    </div>
+
+    <div class="group">
+      <h2>Efektide toggled</h2>
+      <label><span>RGB Split</span><input id="fxRgb" type="checkbox" checked /></label>
+      <label><span>Datamoshing Lite</span><input id="fxMosh" type="checkbox" checked /></label>
+      <label><span>Pixel Sorting</span><input id="fxPixelSort" type="checkbox" checked /></label>
+      <label><span>Audio-Reactive</span><input id="fxAudio" type="checkbox" checked /></label>
+      <label><span>Scanlines</span><input id="fxScanline" type="checkbox" checked /></label>
+      <label><span>VHS Noise</span><input id="fxVhs" type="checkbox" checked /></label>
+      <label><span>Mirror Dimension</span><input id="fxMirror" type="checkbox" checked /></label>
+      <label><span>Frame Freeze</span><input id="fxFreeze" type="checkbox" checked /></label>
+    </div>
+
+    <div class="status" id="status">Lae foto üles või käivita kaamera.</div>
+    <p class="hint">Hiire liigutus juhib RGB nihutust. Klikk canvasel lisab/uuendab külmutatud ala. Paremklikk eemaldab freeze-ala.</p>
+  </aside>
+
+  <main class="panel viewer">
+    <div class="badge" id="modeBadge">idle</div>
+    <canvas id="screen" width="960" height="540"></canvas>
+  </main>
+
+  <video id="camera" autoplay muted playsinline style="display:none"></video>
+
+  <script>
+    const W = 960;
+    const H = 540;
+
+    const screen = document.getElementById("screen");
+    const ctx = screen.getContext("2d");
+
+    const sourceCanvas = document.createElement("canvas");
+    sourceCanvas.width = W;
+    sourceCanvas.height = H;
+    const sctx = sourceCanvas.getContext("2d", { willReadFrequently: true });
+
+    const workCanvas = document.createElement("canvas");
+    workCanvas.width = W;
+    workCanvas.height = H;
+    const wctx = workCanvas.getContext("2d", { willReadFrequently: true });
+
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = W;
+    tempCanvas.height = H;
+    const tctx = tempCanvas.getContext("2d", { willReadFrequently: true });
+
+    const camera = document.getElementById("camera");
+    const uploadInput = document.getElementById("upload");
+    const startCameraBtn = document.getElementById("startCamera");
+    const stopCameraBtn = document.getElementById("stopCamera");
+    const enableMicBtn = document.getElementById("enableMic");
+    const toggleShakeBtn = document.getElementById("toggleShake");
+    const saveChaosBtn = document.getElementById("saveChaos");
+    const statusEl = document.getElementById("status");
+    const modeBadge = document.getElementById("modeBadge");
+
+    const fx = {
+      rgb: document.getElementById("fxRgb"),
+      mosh: document.getElementById("fxMosh"),
+      pixelSort: document.getElementById("fxPixelSort"),
+      audio: document.getElementById("fxAudio"),
+      scanline: document.getElementById("fxScanline"),
+      vhs: document.getElementById("fxVhs"),
+      mirror: document.getElementById("fxMirror"),
+      freeze: document.getElementById("fxFreeze")
+    };
+
+    const controls = {
+      asciiMode: document.getElementById("asciiMode"),
+      mirrorSectors: document.getElementById("mirrorSectors"),
+      rgbStrength: document.getElementById("rgbStrength"),
+      moshStrength: document.getElementById("moshStrength"),
+      audioStrength: document.getElementById("audioStrength")
+    };
+
+    let cameraStream = null;
+    let uploadedImage = null;
+    let sourceMode = "idle";
+    let prevFrame = null;
+    let frameCount = 0;
+
+    let mouse = { x: W / 2, y: H / 2, vx: 0, vy: 0, lastX: W / 2, lastY: H / 2 };
+
+    let freezeState = { active: false, x: W / 2, y: H / 2, r: 92, data: null };
+
+    let audioCtx = null;
+    let analyser = null;
+    let micData = null;
+    let micVolume = 0;
+    let screamShakeEnabled = false;
+    let shakeKick = 0;
+
+    function updateStatus(text) {
+      statusEl.textContent = text;
+    }
+
+    function setMode(mode) {
+      sourceMode = mode;
+      modeBadge.textContent = mode;
+    }
+
+    function stopCameraTracks() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((t) => t.stop());
+        cameraStream = null;
+      }
+      camera.pause();
+      camera.srcObject = null;
+    }
+
+    function waitForVideoReady(videoEl, timeoutMs = 1800) {
+      return new Promise((resolve, reject) => {
+        if (videoEl.readyState >= 2) {
+          resolve();
+          return;
+        }
+
+        const onReady = () => {
+          cleanup();
+          resolve();
+        };
+
+        const onTimeout = () => {
+          cleanup();
+          reject(new Error("Video ei laadinud õigeaegselt"));
+        };
+
+        const cleanup = () => {
+          clearTimeout(timer);
+          videoEl.removeEventListener("loadeddata", onReady);
+          videoEl.removeEventListener("loadedmetadata", onReady);
+        };
+
+        const timer = setTimeout(onTimeout, timeoutMs);
+        videoEl.addEventListener("loadeddata", onReady, { once: true });
+        videoEl.addEventListener("loadedmetadata", onReady, { once: true });
+      });
+    }
+
+    async function startCamera() {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          updateStatus("Brauser ei toeta kaamerat (getUserMedia puudub).");
+          return;
+        }
+
+        stopCameraTracks();
+
+        updateStatus("Kaamera käivitub... kinnita brauseris loa küsimus.");
+
+        const cameraProfiles = [
+          { video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+          { video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+          { video: true, audio: false }
+        ];
+
+        let startErr = null;
+        for (const profile of cameraProfiles) {
+          try {
+            cameraStream = await navigator.mediaDevices.getUserMedia(profile);
+            break;
+          } catch (err) {
+            startErr = err;
+          }
+        }
+
+        if (!cameraStream) {
+          throw startErr || new Error("Kaamera ei käivitunud");
+        }
+
+        camera.srcObject = cameraStream;
+        camera.setAttribute("autoplay", "");
+        camera.setAttribute("playsinline", "");
+        await camera.play();
+        await waitForVideoReady(camera);
+        uploadedImage = null;
+        setMode("camera");
+        updateStatus("Kaamera voog aktiivne.");
+      } catch (err) {
+        stopCameraTracks();
+
+        let hint = "";
+        if (err && err.name === "NotAllowedError") {
+          hint = " Luba kaamera juurdepääs brauseri seadetes ja proovi uuesti.";
+        } else if (err && err.name === "NotFoundError") {
+          hint = " Kaamerat ei leitud (kontrolli, et seade on ühendatud).";
+        } else if (err && err.name === "NotReadableError") {
+          hint = " Kaamera on tõenäoliselt teises rakenduses kasutusel.";
+        } else if (!window.isSecureContext) {
+          hint = " Ava leht HTTPS-is või localhostis (file:// all võib kaamera olla blokeeritud).";
+        }
+
+        updateStatus("Kaamera käivitamine ebaõnnestus: " + (err?.message || "tundmatu viga") + hint);
+      }
+    }
+
+    function stopCamera() {
+      stopCameraTracks();
+      if (sourceMode === "camera") {
+        setMode("idle");
+      }
+      updateStatus("Kaamera peatatud.");
+    }
+
+    uploadInput.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const img = new Image();
+      img.onload = () => {
+        uploadedImage = img;
+        stopCamera();
+        setMode("upload");
+        updateStatus("Foto laetud: " + file.name);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    async function enableMicrophone() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        const source = audioCtx.createMediaStreamSource(micStream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        micData = new Uint8Array(analyser.frequencyBinCount);
+        source.connect(analyser);
+        updateStatus("Mikrofon ühendatud. Helitugevus juhib moonutust.");
+      } catch (err) {
+        updateStatus("Mikrofoni luba puudub või viga: " + err.message);
+      }
+    }
+
+    function computeVolume() {
+      if (!analyser || !micData) {
+        micVolume = 0;
+        return;
+      }
+      analyser.getByteFrequencyData(micData);
+      let sum = 0;
+      for (let i = 0; i < micData.length; i++) {
+        sum += micData[i];
+      }
+      micVolume = (sum / micData.length) / 255;
+    }
+
+    function updateShakeButton() {
+      toggleShakeBtn.textContent = screamShakeEnabled ? "Scream Shake ON" : "Scream Shake OFF";
+      toggleShakeBtn.style.borderColor = screamShakeEnabled ? "#57e2b1" : "#2d6f5b";
+      toggleShakeBtn.style.background = screamShakeEnabled ? "#1a4c3f" : "#0e2b22";
+    }
+
+    function applyScreamShake(targetCtx) {
+      if (!screamShakeEnabled || !analyser) {
+        shakeKick = 0;
+        return;
+      }
+
+      const screamThreshold = 0.38;
+      if (micVolume > screamThreshold) {
+        shakeKick = Math.min(18, shakeKick + 2.8 + (micVolume - screamThreshold) * 22);
+      } else {
+        shakeKick = Math.max(0, shakeKick - 1.4);
+      }
+
+      if (shakeKick <= 0.2) {
+        return;
+      }
+
+      const maxOffset = Math.min(26, shakeKick);
+      const dx = (Math.random() * 2 - 1) * maxOffset;
+      const dy = (Math.random() * 2 - 1) * maxOffset;
+
+      tctx.clearRect(0, 0, W, H);
+      tctx.drawImage(screen, 0, 0);
+      targetCtx.clearRect(0, 0, W, H);
+      targetCtx.drawImage(tempCanvas, dx, dy, W, H);
+    }
+
+    function drawSource() {
+      sctx.clearRect(0, 0, W, H);
+
+      if (sourceMode === "camera" && camera.readyState >= 2) {
+        sctx.drawImage(camera, 0, 0, W, H);
+        return true;
+      }
+
+      if (sourceMode === "upload" && uploadedImage) {
+        const scale = Math.max(W / uploadedImage.width, H / uploadedImage.height);
+        const dw = uploadedImage.width * scale;
+        const dh = uploadedImage.height * scale;
+        const dx = (W - dw) * 0.5;
+        const dy = (H - dh) * 0.5;
+        sctx.drawImage(uploadedImage, dx, dy, dw, dh);
+        return true;
+      }
+
+      sctx.fillStyle = "#07100c";
+      sctx.fillRect(0, 0, W, H);
+      sctx.fillStyle = "#57e2b1";
+      sctx.font = "700 22px Orbitron, sans-serif";
+      sctx.fillText("Lae foto või lülita kaamera sisse", 220, H / 2);
+      return false;
+    }
+
+    function applyRgbSplit(imageData) {
+      const out = new ImageData(W, H);
+      const src = imageData.data;
+      const dst = out.data;
+      const amp = Number(controls.rgbStrength.value);
+      const mx = (mouse.x / W - 0.5) * 2;
+      const my = (mouse.y / H - 0.5) * 2;
+
+      const rx = Math.round(mx * amp);
+      const ry = Math.round(my * amp);
+      const gx = Math.round(-my * amp * 0.7);
+      const gy = Math.round(mx * amp * 0.7);
+      const bx = Math.round(-mx * amp);
+      const by = Math.round(-my * amp);
+
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          const i = (y * W + x) * 4;
+
+          const rI = sampleIndex(x + rx, y + ry);
+          const gI = sampleIndex(x + gx, y + gy);
+          const bI = sampleIndex(x + bx, y + by);
+
+          dst[i] = src[rI];
+          dst[i + 1] = src[gI + 1];
+          dst[i + 2] = src[bI + 2];
+          dst[i + 3] = 255;
+        }
+      }
+      return out;
+    }
+
+    function sampleIndex(x, y) {
+      const cx = Math.min(W - 1, Math.max(0, x));
+      const cy = Math.min(H - 1, Math.max(0, y));
+      return (cy * W + cx) * 4;
+    }
+
+    function applyDatamosh(currentData) {
+      if (!prevFrame) {
+        prevFrame = new Uint8ClampedArray(currentData.data);
+        return currentData;
+      }
+      const strength = Number(controls.moshStrength.value);
+      const out = new ImageData(W, H);
+      const src = currentData.data;
+      const dst = out.data;
+      const smearX = Math.round(mouse.vx * 0.8);
+      const smearY = Math.round(mouse.vy * 0.8);
+
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          const i = (y * W + x) * 4;
+          const p = sampleIndex(x - smearX, y - smearY);
+
+          dst[i] = src[i] * (1 - strength) + prevFrame[p] * strength;
+          dst[i + 1] = src[i + 1] * (1 - strength) + prevFrame[p + 1] * strength;
+          dst[i + 2] = src[i + 2] * (1 - strength) + prevFrame[p + 2] * strength;
+          dst[i + 3] = 255;
+        }
+      }
+      prevFrame = new Uint8ClampedArray(dst);
+      return out;
+    }
+
+    function applyPixelSorting(imageData) {
+      const data = imageData.data;
+      const boxW = 160;
+      const boxH = 70;
+      const sx = Math.floor(((Math.sin(frameCount * 0.017) * 0.5 + 0.5) * (W - boxW)));
+      const sy = Math.floor(((Math.cos(frameCount * 0.023) * 0.5 + 0.5) * (H - boxH)));
+
+      for (let y = sy; y < sy + boxH; y++) {
+        const pixels = [];
+        for (let x = sx; x < sx + boxW; x++) {
+          const i = (y * W + x) * 4;
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          pixels.push({ r, g, b, lum });
+        }
+        pixels.sort((a, b) => a.lum - b.lum);
+        for (let x = sx; x < sx + boxW; x++) {
+          const p = pixels[x - sx];
+          const i = (y * W + x) * 4;
+          data[i] = p.r;
+          data[i + 1] = p.g;
+          data[i + 2] = p.b;
+        }
+      }
+      return imageData;
+    }
+
+    function applyAudioDistortion(imageData) {
+      const out = new ImageData(W, H);
+      const src = imageData.data;
+      const dst = out.data;
+      const base = Number(controls.audioStrength.value);
+      const amount = base * micVolume;
+
+      for (let y = 0; y < H; y++) {
+        const wave = Math.sin(y * 0.065 + frameCount * 0.12) * amount;
+        for (let x = 0; x < W; x++) {
+          const i = (y * W + x) * 4;
+          const j = sampleIndex(Math.round(x + wave), y);
+          dst[i] = src[j];
+          dst[i + 1] = src[j + 1];
+          dst[i + 2] = src[j + 2];
+          dst[i + 3] = 255;
+        }
+      }
+      return out;
+    }
+
+    function drawScanlines(targetCtx) {
+      targetCtx.save();
+      targetCtx.globalAlpha = 0.13;
+      targetCtx.fillStyle = "#000";
+      const shift = frameCount % 6;
+      for (let y = shift; y < H; y += 4) {
+        targetCtx.fillRect(0, y, W, 2);
+      }
+      targetCtx.restore();
+    }
+
+    function drawVhsNoise(targetCtx) {
+      targetCtx.save();
+      targetCtx.globalAlpha = 0.22;
+      for (let i = 0; i < 2600; i++) {
+        const x = Math.random() * W;
+        const y = Math.random() * H;
+        const c = Math.random() * 255 | 0;
+        targetCtx.fillStyle = `rgb(${c},${c},${c})`;
+        targetCtx.fillRect(x, y, 1, 1);
+      }
+
+      targetCtx.globalAlpha = 0.09;
+      for (let i = 0; i < 6; i++) {
+        const y = Math.random() * H;
+        const h = 4 + Math.random() * 16;
+        targetCtx.fillStyle = "#fff";
+        targetCtx.fillRect(0, y, W, h);
+      }
+      targetCtx.restore();
+    }
+
+    function applyMirrorDimension() {
+      tctx.clearRect(0, 0, W, H);
+      const sectors = Number(controls.mirrorSectors.value);
+
+      if (sectors === 4) {
+        const hw = W / 2;
+        const hh = H / 2;
+        tctx.drawImage(workCanvas, 0, 0, hw, hh);
+
+        tctx.save();
+        tctx.translate(W, 0);
+        tctx.scale(-1, 1);
+        tctx.drawImage(workCanvas, 0, 0, hw, hh);
+        tctx.restore();
+
+        tctx.save();
+        tctx.translate(0, H);
+        tctx.scale(1, -1);
+        tctx.drawImage(workCanvas, 0, 0, hw, hh);
+        tctx.restore();
+
+        tctx.save();
+        tctx.translate(W, H);
+        tctx.scale(-1, -1);
+        tctx.drawImage(workCanvas, 0, 0, hw, hh);
+        tctx.restore();
+      } else {
+        const sliceW = W / 8;
+        for (let i = 0; i < 8; i++) {
+          tctx.save();
+          if (i % 2 === 0) {
+            tctx.drawImage(workCanvas, 0, 0, sliceW, H, i * sliceW, 0, sliceW, H);
+          } else {
+            tctx.translate((i + 1) * sliceW, 0);
+            tctx.scale(-1, 1);
+            tctx.drawImage(workCanvas, 0, 0, sliceW, H, 0, 0, sliceW, H);
+          }
+          tctx.restore();
+        }
+      }
+      wctx.clearRect(0, 0, W, H);
+      wctx.drawImage(tempCanvas, 0, 0);
+    }
+
+    function captureFreezeRegion() {
+      const { x, y, r } = freezeState;
+      const sx = Math.max(0, Math.floor(x - r));
+      const sy = Math.max(0, Math.floor(y - r));
+      const sw = Math.min(W - sx, Math.floor(2 * r));
+      const sh = Math.min(H - sy, Math.floor(2 * r));
+      freezeState.data = sctx.getImageData(sx, sy, sw, sh);
+      freezeState.bounds = { sx, sy, sw, sh };
+      freezeState.active = true;
+    }
+
+    function drawFreezeRegion(targetCtx) {
+      if (!freezeState.active || !freezeState.data || !freezeState.bounds) return;
+      const { sx, sy, sw, sh } = freezeState.bounds;
+      targetCtx.save();
+      targetCtx.beginPath();
+      targetCtx.arc(freezeState.x, freezeState.y, freezeState.r, 0, Math.PI * 2);
+      targetCtx.clip();
+      targetCtx.putImageData(freezeState.data, sx, sy);
+      targetCtx.restore();
+
+      targetCtx.save();
+      targetCtx.strokeStyle = "rgba(95,255,200,0.7)";
+      targetCtx.lineWidth = 2;
+      targetCtx.beginPath();
+      targetCtx.arc(freezeState.x, freezeState.y, freezeState.r, 0, Math.PI * 2);
+      targetCtx.stroke();
+      targetCtx.restore();
+    }
+
+    function renderAscii() {
+      const chars = "@#W$9876543210?!abc;:+=-,._ ";
+      const cell = 8;
+      const cols = Math.floor(W / cell);
+      const rows = Math.floor(H / cell);
+
+      tctx.clearRect(0, 0, W, H);
+      tctx.drawImage(workCanvas, 0, 0, cols, rows);
+      const small = tctx.getImageData(0, 0, cols, rows).data;
+
+      ctx.fillStyle = "#030906";
+      ctx.fillRect(0, 0, W, H);
+      ctx.font = `${cell + 1}px Space Mono`;
+
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const i = (y * cols + x) * 4;
+          const r = small[i];
+          const g = small[i + 1];
+          const b = small[i + 2];
+          const lum = (r + g + b) / 3;
+          const idx = Math.floor((lum / 255) * (chars.length - 1));
+          const ch = chars[chars.length - 1 - idx];
+          ctx.fillStyle = `rgb(${Math.min(255, r + 20)},${Math.min(255, g + 14)},${Math.min(255, b + 10)})`;
+          ctx.fillText(ch, x * cell, y * cell + cell);
+        }
+      }
+    }
+
+    function addRandomArtifact(targetCtx) {
+      const type = Math.floor(Math.random() * 4);
+
+      if (type === 0) {
+        const shift = 8 + Math.random() * 40;
+        const img = targetCtx.getImageData(0, 0, W, H);
+        const out = targetCtx.createImageData(W, H);
+        for (let y = 0; y < H; y++) {
+          for (let x = 0; x < W; x++) {
+            const i = (y * W + x) * 4;
+            const ri = sampleIndex(x + shift, y);
+            const gi = sampleIndex(x - shift, y);
+            out.data[i] = img.data[ri];
+            out.data[i + 1] = img.data[gi + 1];
+            out.data[i + 2] = img.data[i + 2];
+            out.data[i + 3] = 255;
+          }
+        }
+        targetCtx.putImageData(out, 0, 0);
+      } else if (type === 1) {
+        targetCtx.save();
+        targetCtx.globalAlpha = 0.25;
+        for (let i = 0; i < 20; i++) {
+          const y = Math.random() * H;
+          const h = 5 + Math.random() * 35;
+          targetCtx.fillStyle = Math.random() > 0.5 ? "#00ffc4" : "#ff6e6e";
+          targetCtx.fillRect(0, y, W, h);
+        }
+        targetCtx.restore();
+      } else if (type === 2) {
+        for (let i = 0; i < 12; i++) {
+          const sx = Math.random() * (W - 120);
+          const sy = Math.random() * (H - 120);
+          const sw = 50 + Math.random() * 160;
+          const sh = 20 + Math.random() * 80;
+          targetCtx.drawImage(screen, sx, sy, sw, sh, sx + (Math.random() * 32 - 16), sy, sw, sh);
+        }
+      } else {
+        targetCtx.save();
+        targetCtx.globalAlpha = 0.16;
+        for (let i = 0; i < 4800; i++) {
+          targetCtx.fillStyle = Math.random() > 0.5 ? "#fff" : "#000";
+          targetCtx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
+        }
+        targetCtx.restore();
+      }
+    }
+
+    function saveChaos() {
+      const saveCanvas = document.createElement("canvas");
+      saveCanvas.width = W;
+      saveCanvas.height = H;
+      const saveCtx = saveCanvas.getContext("2d");
+      saveCtx.drawImage(screen, 0, 0);
+      addRandomArtifact(saveCtx);
+
+      const link = document.createElement("a");
+      link.download = `digital-nightmare-${Date.now()}.png`;
+      link.href = saveCanvas.toDataURL("image/png", 1.0);
+      link.click();
+      updateStatus("Chaos Save valmis. Lisati juhuslik artefakt.");
+    }
+
+    function renderFrame() {
+      frameCount++;
+      computeVolume();
+      mouse.vx = mouse.x - mouse.lastX;
+      mouse.vy = mouse.y - mouse.lastY;
+      mouse.lastX = mouse.x;
+      mouse.lastY = mouse.y;
+
+      drawSource();
+      wctx.clearRect(0, 0, W, H);
+      wctx.drawImage(sourceCanvas, 0, 0);
+
+      let frame = wctx.getImageData(0, 0, W, H);
+
+      if (fx.rgb.checked) {
+        frame = applyRgbSplit(frame);
+      }
+
+      if (fx.mosh.checked) {
+        frame = applyDatamosh(frame);
+      }
+
+      if (fx.pixelSort.checked) {
+        frame = applyPixelSorting(frame);
+      }
+
+      if (fx.audio.checked) {
+        frame = applyAudioDistortion(frame);
+      }
+
+      wctx.putImageData(frame, 0, 0);
+
+      if (fx.freeze.checked && freezeState.active) {
+        drawFreezeRegion(wctx);
+      }
+
+      if (fx.mirror.checked) {
+        applyMirrorDimension();
+      }
+
+      if (controls.asciiMode.checked) {
+        renderAscii();
+      } else {
+        ctx.clearRect(0, 0, W, H);
+        ctx.drawImage(workCanvas, 0, 0);
+      }
+
+      if (fx.scanline.checked) {
+        drawScanlines(ctx);
+      }
+
+      if (fx.vhs.checked) {
+        drawVhsNoise(ctx);
+      }
+
+      applyScreamShake(ctx);
+
+      requestAnimationFrame(renderFrame);
+    }
+
+    screen.addEventListener("mousemove", (e) => {
+      const rect = screen.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * W;
+      mouse.y = ((e.clientY - rect.top) / rect.height) * H;
+    });
+
+    screen.addEventListener("click", (e) => {
+      if (!fx.freeze.checked) return;
+      const rect = screen.getBoundingClientRect();
+      freezeState.x = ((e.clientX - rect.left) / rect.width) * W;
+      freezeState.y = ((e.clientY - rect.top) / rect.height) * H;
+      captureFreezeRegion();
+      updateStatus("Frame Freeze ala seatud.");
+    });
+
+    screen.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      freezeState.active = false;
+      freezeState.data = null;
+      updateStatus("Frame Freeze ala eemaldatud.");
+    });
+
+    startCameraBtn.addEventListener("click", startCamera);
+    stopCameraBtn.addEventListener("click", stopCamera);
+    enableMicBtn.addEventListener("click", enableMicrophone);
+    toggleShakeBtn.addEventListener("click", () => {
+      if (!analyser) {
+        updateStatus("Esmalt lülita mikrofon sisse (Mikrofon ON).");
+        return;
+      }
+      screamShakeEnabled = !screamShakeEnabled;
+      updateShakeButton();
+      updateStatus(screamShakeEnabled ? "Scream Shake aktiivne. Karju mikrofoni." : "Scream Shake välja lülitatud.");
+    });
+    saveChaosBtn.addEventListener("click", saveChaos);
+
+    updateShakeButton();
+    renderFrame();
+  </script>
+</body>
+</html>

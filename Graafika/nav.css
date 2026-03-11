@@ -1,0 +1,92 @@
+.demo-nav {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #ffffffea;
+  border: 1px solid #0000001f;
+  box-shadow: 0 8px 18px #0000002b;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  overflow: hidden;
+}
+
+.demo-nav a,
+.demo-nav button {
+  font: inherit;
+  border-radius: 8px;
+  border: 1px solid #00000029;
+  background: #ffffff;
+  color: #101010;
+  height: 34px;
+}
+
+.demo-nav a,
+.demo-nav button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.demo-nav-top {
+  display: flex;
+  gap: 8px;
+}
+
+.demo-nav-top a {
+  flex: 1;
+}
+
+.demo-nav-list {
+  overflow: auto;
+  max-height: calc(100vh - 90px);
+  display: grid;
+  gap: 6px;
+  padding-right: 2px;
+}
+
+.demo-nav-item {
+  justify-content: flex-start;
+  min-height: 34px;
+  padding: 6px 10px;
+  line-height: 1.15;
+}
+
+.demo-nav-item.active {
+  background: #0b5ed7;
+  color: #ffffff;
+  border-color: #0b5ed7;
+}
+
+.demo-nav a:hover,
+.demo-nav button:hover {
+  background: #f3f7ff;
+}
+
+.demo-nav-item.active:hover {
+  background: #0a53be;
+}
+
+@media (max-width: 640px) {
+  .demo-nav {
+    top: auto;
+    right: 8px;
+    left: 8px;
+    bottom: 8px;
+    width: auto;
+    max-height: 55vh;
+  }
+
+  .demo-nav-list {
+    max-height: calc(55vh - 74px);
+  }
+}

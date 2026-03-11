@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>09 Custom Cursor Shape</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      cursor: none;
+      background: linear-gradient(120deg, #f4d35e, #ee964b, #f95738);
+      overflow: hidden;
+      font-family: "Gill Sans", sans-serif;
+    }
+    .cursor {
+      position: fixed;
+      width: 34px;
+      height: 34px;
+      border: 3px solid #1a1a1a;
+      border-radius: 50% 10% 50% 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      background: #ffffff88;
+      backdrop-filter: blur(1px);
+    }
+    .info { position: fixed; left: 12px; top: 8px; color: #1a1a1a; font-weight: 700; }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <div class="info">Kohandatud kursor poordub liikumisel.</div>
+  <div class="cursor" id="cursor"></div>
+  <script>
+    const c = document.getElementById('cursor');
+    let px = innerWidth / 2;
+    let py = innerHeight / 2;
+    let angle = 0;
+    addEventListener('pointermove', (event) => {
+      const dx = event.clientX - px;
+      const dy = event.clientY - py;
+      angle += Math.hypot(dx, dy) * 0.5;
+      px = event.clientX;
+      py = event.clientY;
+      c.style.left = `${px}px`;
+      c.style.top = `${py}px`;
+      c.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+    });
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

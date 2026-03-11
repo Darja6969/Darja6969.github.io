@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>13 Dragging Physics</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f6fff8;
+      overflow: hidden;
+      font-family: "Lucida Sans", sans-serif;
+    }
+    .box {
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border-radius: 18px;
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      box-shadow: 0 8px 16px #0000002a;
+      cursor: grab;
+      touch-action: none;
+    }
+    .hint { position: fixed; left: 10px; top: 8px; }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <div class="hint">Lohista kaste: nad jargnevad raskelt inertsiga.</div>
+  <script>
+    const palette = ['#2d6a4f', '#1b4965', '#5f0f40', '#f77f00'];
+    const items = [];
+    for (let i = 0; i < 6; i += 1) {
+      const el = document.createElement('div');
+      el.className = 'box';
+      el.textContent = i + 1;
+      el.style.background = palette[i % palette.length];
+      const item = {
+        el,
+        x: 60 + i * 120,
+        y: 160 + (i % 2) * 130,
+        tx: 60 + i * 120,
+        ty: 160 + (i % 2) * 130,
+        dragging: false,
+        ox: 0,
+        oy: 0
+      };
+      el.style.left = `${item.x}px`;
+      el.style.top = `${item.y}px`;
+      document.body.appendChild(el);
+      items.push(item);
+
+      el.addEventListener('pointerdown', (event) => {
+        item.dragging = true;
+        item.ox = event.clientX - item.tx;
+        item.oy = event.clientY - item.ty;
+        el.setPointerCapture(event.pointerId);
+      });
+      el.addEventListener('pointermove', (event) => {
+        if (!item.dragging) return;
+        item.tx = event.clientX - item.ox;
+        item.ty = event.clientY - item.oy;
+      });
+      el.addEventListener('pointerup', () => { item.dragging = false; });
+      el.addEventListener('pointercancel', () => { item.dragging = false; });
+    }
+
+    function animate() {
+      items.forEach((item) => {
+        item.x += (item.tx - item.x) * 0.14;
+        item.y += (item.ty - item.y) * 0.14;
+        item.el.style.left = `${item.x}px`;
+        item.el.style.top = `${item.y}px`;
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

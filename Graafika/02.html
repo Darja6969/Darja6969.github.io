@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>02 Magnetic Buttons</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #fef2c4, #d9f0ff);
+      font-family: "Tahoma", sans-serif;
+    }
+    .row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 16px 28px;
+      font-size: 18px;
+      font-weight: 700;
+      background: #13315c;
+      color: white;
+      cursor: pointer;
+      transition: transform 180ms ease;
+      box-shadow: 0 8px 20px #0000002b;
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <div class="row">
+    <button>Nupp A</button>
+    <button>Nupp B</button>
+    <button>Nupp C</button>
+  </div>
+  <script>
+    const buttons = [...document.querySelectorAll('button')];
+    window.addEventListener('pointermove', (event) => {
+      buttons.forEach((btn) => {
+        const r = btn.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const dx = event.clientX - cx;
+        const dy = event.clientY - cy;
+        const dist = Math.hypot(dx, dy);
+        const range = 140;
+        if (dist < range) {
+          const pull = (1 - dist / range) * 14;
+          const angle = Math.atan2(dy, dx);
+          btn.style.transform = `translate(${Math.cos(angle) * pull}px, ${Math.sin(angle) * pull}px)`;
+        } else {
+          btn.style.transform = 'translate(0, 0)';
+        }
+      });
+    });
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

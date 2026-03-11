@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>03 Dynamic Background Gradient</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Georgia", serif;
+      color: white;
+      transition: background 180ms linear;
+      background: radial-gradient(circle at 50% 50%, #356dff, #1a193a 70%);
+    }
+    h1 {
+      text-align: center;
+      background: #0000004f;
+      padding: 16px 24px;
+      border-radius: 12px;
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <h1>Liiguta hiirt nurkadesse</h1>
+  <script>
+    const corner = {
+      tl: [255, 91, 121],
+      tr: [67, 97, 238],
+      bl: [46, 196, 182],
+      br: [255, 159, 28]
+    };
+    const mix = (a, b, t) => Math.round(a + (b - a) * t);
+    const toRGB = (c) => `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+
+    window.addEventListener('pointermove', (event) => {
+      const x = event.clientX / innerWidth;
+      const y = event.clientY / innerHeight;
+      const top = corner.tl.map((v, i) => mix(v, corner.tr[i], x));
+      const bottom = corner.bl.map((v, i) => mix(v, corner.br[i], x));
+      const center = top.map((v, i) => mix(v, bottom[i], y));
+      const edge = center.map((v) => Math.max(0, v - 100));
+      document.body.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, ${toRGB(center)}, ${toRGB(edge)} 72%)`;
+    });
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

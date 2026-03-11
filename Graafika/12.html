@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>12 Color Splash</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #090d1f;
+      overflow: hidden;
+      font-family: "Segoe UI", sans-serif;
+      color: #d0dcff;
+    }
+    .hint { position: fixed; left: 10px; top: 8px; }
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      mix-blend-mode: screen;
+      filter: blur(4px);
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <div class="hint">Hoia hiirenuppu all, et laik kasvaks.</div>
+  <script>
+    let blob = null;
+    let radius = 10;
+    let hold = false;
+    let x = 0;
+    let y = 0;
+
+    function loop() {
+      if (hold && blob) {
+        radius = Math.min(240, radius + 3.2);
+        blob.style.width = `${radius * 2}px`;
+        blob.style.height = `${radius * 2}px`;
+      }
+      requestAnimationFrame(loop);
+    }
+    loop();
+
+    addEventListener('mousedown', (event) => {
+      x = event.clientX;
+      y = event.clientY;
+      radius = 10;
+      hold = true;
+      blob = document.createElement('div');
+      blob.className = 'blob';
+      blob.style.left = `${x}px`;
+      blob.style.top = `${y}px`;
+      blob.style.width = '20px';
+      blob.style.height = '20px';
+      blob.style.background = `radial-gradient(circle, hsl(${Math.random() * 360} 90% 60%), transparent 70%)`;
+      document.body.appendChild(blob);
+    });
+
+    addEventListener('mouseup', () => {
+      hold = false;
+      if (!blob) return;
+      blob.animate([
+        { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
+        { opacity: 0, transform: 'translate(-50%, -50%) scale(1.4)' }
+      ], { duration: 320, fill: 'forwards' }).onfinish = () => blob.remove();
+      blob = null;
+    });
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

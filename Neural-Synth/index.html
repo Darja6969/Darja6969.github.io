@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neural Synth Canvas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Syne:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="toolbar">
+      <div class="brand">
+        <h1>Neural Synth</h1>
+        <p>Joonista heli. Värvibrušš on instrument.</p>
+      </div>
+
+      <div class="controls">
+        <div class="palette" role="group" aria-label="Värvipalett">
+          <button class="swatch active" data-color="red" title="Punane bass" aria-label="Punane bass"></button>
+          <button class="swatch" data-color="blue" title="Sinine klaver" aria-label="Sinine klaver"></button>
+          <button class="swatch" data-color="yellow" title="Kollane sünt" aria-label="Kollane sünt"></button>
+        </div>
+
+        <button id="symmetryBtn" class="action-btn">Sümmeetria: OFF</button>
+        <button id="magnetModeBtn" class="action-btn">Magnetid: OFF</button>
+        <button id="recordBtn" class="action-btn">Record 5s</button>
+        <button id="shakeBtn" class="action-btn">Shake Clear</button>
+        <button id="clearBtn" class="action-btn">Puhasta</button>
+      </div>
+    </header>
+
+    <main class="canvas-wrap">
+      <canvas id="synthCanvas" aria-label="Heli lõuend"></canvas>
+      <aside class="legend">
+        <h2>Kaardistus</h2>
+        <p id="statusText" class="status-text">Looper: OFF</p>
+        <ul>
+          <li>Pitch-on-Y: kõrgem joon = kõrgem noot</li>
+          <li>Speed-Volume: kiirem liikumine = valjem + teravam</li>
+          <li>Echo Trails: joon + heli hääbuvad koos</li>
+          <li>Gravity Loops: magnetid loovad lõputud mustrid</li>
+          <li>Symmetry Mode: 4 peegeldust = heliline akord</li>
+          <li>Waveform Brush: joon väriseb nagu ostsillogramm</li>
+        </ul>
+      </aside>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

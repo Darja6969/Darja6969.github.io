@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>05 Scroll-Driven Scaling</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 260vh;
+      background: linear-gradient(#f7f5ff, #cce0ff);
+      font-family: "Impact", "Arial Black", sans-serif;
+      overflow-x: hidden;
+    }
+    .wrap {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+    }
+    .card {
+      width: min(70vw, 520px);
+      background: white;
+      border-radius: 24px;
+      padding: 26px;
+      text-align: center;
+      letter-spacing: 0.05em;
+      box-shadow: 0 22px 40px #00000030;
+      transform-origin: center;
+    }
+    .info { position: fixed; top: 10px; left: 12px; font-family: "Verdana"; }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <div class="info">Keri lehte alla ja ules.</div>
+  <div class="wrap">
+    <div class="card" id="card">SCROLL SCALE</div>
+  </div>
+  <script>
+    const card = document.getElementById('card');
+    const update = () => {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const t = max > 0 ? scrollY / max : 0;
+      const scale = 0.6 + t * 1.6;
+      card.style.transform = `scale(${scale.toFixed(3)}) rotate(${(t * 8).toFixed(2)}deg)`;
+    };
+    addEventListener('scroll', update, { passive: true });
+    update();
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

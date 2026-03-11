@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graafika JS Demos</title>
+  <style>
+    :root {
+      --bg: #f8f4e8;
+      --ink: #1b1c1f;
+      --card: #ffffff;
+      --accent: #007f5f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 10% 0%, #fff4d6, transparent 40%),
+                  radial-gradient(circle at 90% 100%, #cde7ff, transparent 45%),
+                  var(--bg);
+      min-height: 100vh;
+      padding: 32px 20px;
+    }
+    h1 { margin-top: 0; letter-spacing: 0.04em; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    a {
+      display: block;
+      text-decoration: none;
+      background: var(--card);
+      color: var(--ink);
+      border: 2px solid #00000010;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 6px 14px #00000014;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+    a:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 18px #0000001f;
+    }
+  </style>
+</head>
+<body>
+  <h1>20 JS graafika demo</h1>
+  <div class="grid" id="links"></div>
+  <script>
+    const names = [
+      'Cursor Trail',
+      'Magnetic Buttons',
+      'Dynamic Background Gradient',
+      'Click-to-Explode',
+      'Scroll-Driven Scaling',
+      'Toggle Themes with Sound',
+      'Hover-Glitch Fall',
+      'Shake to Clear',
+      'Custom Cursor Shape',
+      'Typing Ghost',
+      'Sticker Slap',
+      'Color Splash',
+      'Dragging Physics',
+      'Auto-Chaos Rotation',
+      'Hover Filter Swap',
+      'Text Shadow Follow',
+      'Z-Index Shuffle',
+      'Eraser Mode',
+      'Key-Sound Piano',
+      'Screen Edge Warp'
+    ];
+    const links = document.getElementById('links');
+    for (let i = 1; i <= 20; i += 1) {
+      const n = String(i).padStart(2, '0');
+      const a = document.createElement('a');
+      a.href = `${n}.html`;
+      a.textContent = `${n}. ${names[i - 1]}`;
+      links.appendChild(a);
+    }
+  </script>
+</body>
+</html>

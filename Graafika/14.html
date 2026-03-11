@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>14 Auto-Chaos Rotation</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f8edeb;
+      overflow: hidden;
+      font-family: "Segoe UI", sans-serif;
+    }
+    .node {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #1d3557;
+      font-weight: 700;
+      background: #ffffffd9;
+      border: 2px dashed #1d355766;
+      box-shadow: 0 10px 24px #0000001c;
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <script>
+    const nodes = [];
+    for (let i = 0; i < 10; i += 1) {
+      const el = document.createElement('div');
+      el.className = 'node';
+      el.textContent = `R${i + 1}`;
+      el.style.left = `${40 + Math.random() * (innerWidth - 180)}px`;
+      el.style.top = `${30 + Math.random() * (innerHeight - 180)}px`;
+      document.body.appendChild(el);
+      nodes.push({
+        el,
+        angle: Math.random() * 360,
+        speed: (Math.random() * 0.8 + 0.2) * (Math.random() > 0.5 ? 1 : -1)
+      });
+    }
+    function loop() {
+      nodes.forEach((n) => {
+        n.angle += n.speed;
+        n.el.style.transform = `rotate(${n.angle}deg)`;
+      });
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

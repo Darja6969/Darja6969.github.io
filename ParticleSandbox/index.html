@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Osakeste Liivakast</title>
+  <link rel="icon" href="data:," />
+  <style>
+    :root {
+      --bg-1: #091018;
+      --bg-2: #152536;
+      --panel: rgba(12, 20, 31, 0.78);
+      --panel-border: rgba(167, 214, 255, 0.22);
+      --text: #ddf1ff;
+      --muted: #9fc3dc;
+      --accent: #68d0ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at 20% 20%, #1f3e56 0%, var(--bg-1) 45%, #070b11 100%);
+      color: var(--text);
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    #app {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    #sim {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    .controls {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 5;
+      display: grid;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 12px;
+      min-width: 290px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 95px 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .row label {
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+
+    select,
+    input[type="text"],
+    input[type="range"],
+    button {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(145, 207, 255, 0.35);
+      background: rgba(8, 15, 24, 0.9);
+      color: var(--text);
+      padding: 7px;
+      font-size: 13px;
+    }
+
+    button {
+      cursor: pointer;
+      transition: transform 0.08s ease;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .inline-toggle {
+      width: auto;
+      justify-self: start;
+      transform: scale(1.1);
+    }
+
+    .stats {
+      position: fixed;
+      right: 14px;
+      top: 14px;
+      z-index: 5;
+      background: rgba(8, 16, 26, 0.68);
+      border: 1px solid var(--panel-border);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      min-width: 170px;
+    }
+
+    .hint {
+      position: fixed;
+      bottom: 14px;
+      left: 14px;
+      z-index: 5;
+      color: #b4d8ef;
+      opacity: 0.9;
+      font-size: 12px;
+      background: rgba(8, 16, 26, 0.5);
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(145, 207, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="sim"></canvas>
+
+    <div class="controls">
+      <div class="row">
+        <label for="toolMode">Reziim</label>
+        <select id="toolMode">
+          <option value="spray">Brush Physics</option>
+          <option value="attract">Attract</option>
+          <option value="repel">Repel</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="material">Materjal</label>
+        <select id="material">
+          <option value="sand">Liiv</option>
+          <option value="water">Vesi</option>
+          <option value="gas">Gaas</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="radius">Pintsli suurus</label>
+        <input id="radius" type="range" min="5" max="50" step="1" value="18" />
+      </div>
+
+      <div class="row">
+        <label for="strength">Joud</label>
+        <input id="strength" type="range" min="10" max="260" step="1" value="120" />
+      </div>
+
+      <div class="row">
+        <label for="wind">Tuul</label>
+        <input id="wind" type="range" min="-300" max="300" step="1" value="0" />
+      </div>
+
+      <div class="row">
+        <label for="heatMap">Heat map</label>
+        <input id="heatMap" class="inline-toggle" type="checkbox" />
+      </div>
+
+      <div class="row">
+        <label for="wordInput">Sona/logo</label>
+        <input id="wordInput" type="text" maxlength="14" value="SANDBOX" />
+      </div>
+
+      <div class="row">
+        <label>&nbsp;</label>
+        <button id="organizeBtn">Rivista SONA</button>
+      </div>
+
+      <div class="row">
+        <label>&nbsp;</label>
+        <button id="freezeBtn">Peata aeg</button>
+      </div>
+
+      <div class="row">
+        <label>&nbsp;</label>
+        <button id="clearBtn">Tuhjenda</button>
+      </div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+    <div class="hint">Spray/Attract/Repel + Tuul + Heat map + Time freeze. Osakesed ei aegu ega kao.</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("sim");
+    const ctx = canvas.getContext("2d");
+
+    const ui = {
+      toolMode: document.getElementById("toolMode"),
+      material: document.getElementById("material"),
+      radius: document.getElementById("radius"),
+      strength: document.getElementById("strength"),
+      wind: document.getElementById("wind"),
+      heatMap: document.getElementById("heatMap"),
+      wordInput: document.getElementById("wordInput"),
+      organizeBtn: document.getElementById("organizeBtn"),
+      freezeBtn: document.getElementById("freezeBtn"),
+      clearBtn: document.getElementById("clearBtn"),
+      stats: document.getElementById("stats")
+    };
+
+    const particles = [];
+    const pointer = { x: 0, y: 0, down: false };
+
+    const materialConfig = {
+      sand: { gravity: 760, drag: 0.965, spread: 24, bounce: 0.08, size: 2.35, color: { r: 242, g: 209, b: 107 } },
+      water: { gravity: 520, drag: 0.988, spread: 120, bounce: 0.25, size: 2.0, color: { r: 75, g: 158, b: 255 } },
+      gas: { gravity: -260, drag: 0.995, spread: 86, bounce: 0.35, size: 1.85, color: { r: 165, g: 165, b: 165 } }
+    };
+
+    let lastTime = performance.now();
+    let audioCtx = null;
+    let audioUnlocked = false;
+    let collisionEnergy = 0;
+    let lastSoundAt = 0;
+    let windForce = 0;
+    let heatMapEnabled = false;
+    let isFrozen = false;
+    let organizeActive = false;
+    let organizationTargets = [];
+    let frameIndex = 0;
+    let smoothFrameMs = 16.7;
+    let qualityLevel = 0;
+
+    const qualityPresets = [
+      { spawnScale: 1.0, collisionInterval: 1, maxNeighbors: 28, drawStep: 1, heatCell: 24, heatSampleStep: 1, label: "HIGH" },
+      { spawnScale: 0.75, collisionInterval: 2, maxNeighbors: 16, drawStep: 1, heatCell: 30, heatSampleStep: 2, label: "MED" },
+      { spawnScale: 0.5, collisionInterval: 3, maxNeighbors: 9, drawStep: 2, heatCell: 38, heatSampleStep: 3, label: "LOW" }
+    ];
+
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function rgbToCss(c) {
+      return `rgb(${c.r | 0}, ${c.g | 0}, ${c.b | 0})`;
+    }
+
+    function mixColor(a, b) {
+      return {
+        r: (a.r + b.r) * 0.5,
+        g: (a.g + b.g) * 0.5,
+        b: (a.b + b.b) * 0.5
+      };
+    }
+
+    function buildTextTargets(text) {
+      const temp = document.createElement("canvas");
+      temp.width = window.innerWidth;
+      temp.height = window.innerHeight;
+      const tctx = temp.getContext("2d");
+
+      tctx.clearRect(0, 0, temp.width, temp.height);
+      tctx.fillStyle = "#ffffff";
+      tctx.textAlign = "center";
+      tctx.textBaseline = "middle";
+      tctx.font = `700 ${Math.max(72, Math.floor(window.innerWidth * 0.18))}px Trebuchet MS`;
+      tctx.fillText(text, temp.width * 0.5, temp.height * 0.5);
+
+      const data = tctx.getImageData(0, 0, temp.width, temp.height).data;
+      const points = [];
+      const step = 8;
+      for (let y = 0; y < temp.height; y += step) {
+        for (let x = 0; x < temp.width; x += step) {
+          const a = data[(y * temp.width + x) * 4 + 3];
+          if (a > 40) {
+            points.push({ x, y });
+          }
+        }
+      }
+      return points;
+    }
+
+    function applySelfOrganization(dt) {
+      if (!organizeActive || organizationTargets.length === 0) return;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const target = organizationTargets[i % organizationTargets.length];
+        const dx = target.x - p.x;
+        const dy = target.y - p.y;
+        p.vx += dx * dt * 2.2;
+        p.vy += dy * dt * 2.2;
+      }
+    }
+
+    function heatColor(t) {
+      const clamped = Math.max(0, Math.min(1, t));
+      const r = Math.floor(255 * Math.min(1, clamped * 1.4));
+      const g = Math.floor(255 * Math.max(0, 1 - Math.abs(clamped - 0.5) * 2));
+      const b = Math.floor(255 * (1 - clamped));
+      return `rgba(${r}, ${g}, ${b}, ${0.15 + clamped * 0.45})`;
+    }
+
+    function getQuality() {
+      return qualityPresets[qualityLevel];
+    }
+
+    function updateAutoSimplification(dt) {
+      smoothFrameMs = smoothFrameMs * 0.92 + dt * 1000 * 0.08;
+
+      if (smoothFrameMs > 28) {
+        qualityLevel = 2;
+      } else if (smoothFrameMs > 20) {
+        qualityLevel = 1;
+      } else {
+        qualityLevel = 0;
+      }
+    }
+
+    function drawHeatMap() {
+      if (!heatMapEnabled || particles.length === 0) return;
+
+      const q = getQuality();
+      const cell = q.heatCell;
+      const counts = new Map();
+      let maxCount = 1;
+
+      for (let i = 0; i < particles.length; i += q.heatSampleStep) {
+        const p = particles[i];
+        const gx = Math.floor(p.x / cell);
+        const gy = Math.floor(p.y / cell);
+        const key = `${gx},${gy}`;
+        const next = (counts.get(key) || 0) + 1;
+        counts.set(key, next);
+        if (next > maxCount) maxCount = next;
+      }
+
+      counts.forEach((count, key) => {
+        const split = key.split(",");
+        const gx = Number(split[0]);
+        const gy = Number(split[1]);
+        const norm = count / maxCount;
+        ctx.fillStyle = heatColor(norm);
+        ctx.fillRect(gx * cell, gy * cell, cell, cell);
+      });
+    }
+
+    function spawnParticles(x, y, count) {
+      const mat = ui.material.value;
+      const radius = Number(ui.radius.value);
+      const cfg = materialConfig[mat];
+      const q = getQuality();
+      const adjustedCount = Math.max(1, Math.floor(count * q.spawnScale));
+
+      for (let i = 0; i < adjustedCount; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = Math.random() * radius;
+        const px = x + Math.cos(a) * r;
+        const py = y + Math.sin(a) * r;
+
+        const baseDown = mat === "gas" ? -60 : 110;
+        const vx = (Math.random() - 0.5) * cfg.spread;
+        const vy = baseDown + (Math.random() - 0.5) * cfg.spread;
+
+        particles.push({
+          x: px,
+          y: py,
+          vx,
+          vy,
+          material: mat,
+          color: {
+            r: Math.max(0, Math.min(255, cfg.color.r + (Math.random() - 0.5) * 14)),
+            g: Math.max(0, Math.min(255, cfg.color.g + (Math.random() - 0.5) * 14)),
+            b: Math.max(0, Math.min(255, cfg.color.b + (Math.random() - 0.5) * 14))
+          },
+          size: cfg.size + Math.random() * 0.7
+        });
+      }
+    }
+
+    function applyBrushForce(dt) {
+      if (!pointer.down) return;
+
+      const mode = ui.toolMode.value;
+      const radius = Number(ui.radius.value);
+      const strength = Number(ui.strength.value);
+
+      if (mode === "spray") {
+        const spawnRate = Math.floor(35 * dt * 60);
+        spawnParticles(pointer.x, pointer.y, Math.max(1, spawnRate));
+        return;
+      }
+
+      const sign = mode === "attract" ? 1 : -1;
+      const radiusSq = radius * radius;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const dx = pointer.x - p.x;
+        const dy = pointer.y - p.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 <= 0.001 || d2 > radiusSq) continue;
+
+        const d = Math.sqrt(d2);
+        const falloff = 1 - d / radius;
+        const impulse = sign * strength * falloff;
+
+        p.vx += (dx / d) * impulse * dt;
+        p.vy += (dy / d) * impulse * dt;
+      }
+    }
+
+    function unlockAudio() {
+      if (audioUnlocked) return;
+      audioCtx = new AudioContext();
+      const buffer = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+      const source = audioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioCtx.destination);
+      source.start(0);
+      audioUnlocked = true;
+    }
+
+    function playCollisionSound(energy) {
+      if (!audioUnlocked || !audioCtx) return;
+
+      const now = performance.now();
+      if (now - lastSoundAt < 60) return;
+      lastSoundAt = now;
+
+      const t = audioCtx.currentTime;
+      const gain = audioCtx.createGain();
+      gain.connect(audioCtx.destination);
+
+      const amp = Math.min(0.08, 0.015 + energy * 0.0009);
+      gain.gain.setValueAtTime(amp, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+
+      const osc = audioCtx.createOscillator();
+      osc.type = Math.random() > 0.5 ? "triangle" : "square";
+      osc.frequency.setValueAtTime(140 + Math.random() * 900, t);
+      osc.frequency.exponentialRampToValueAtTime(60 + Math.random() * 120, t + 0.08);
+      osc.connect(gain);
+      osc.start(t);
+      osc.stop(t + 0.09);
+
+      const noiseBuffer = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.04), audioCtx.sampleRate);
+      const noiseData = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < noiseData.length; i++) {
+        noiseData[i] = (Math.random() * 2 - 1) * (1 - i / noiseData.length);
+      }
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = noiseBuffer;
+
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = "highpass";
+      noiseFilter.frequency.value = 1200;
+
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(amp * 0.7, t);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(audioCtx.destination);
+      noise.start(t);
+      noise.stop(t + 0.05);
+    }
+
+    function updatePhysics(dt) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const q = getQuality();
+      const runCollisions = frameIndex % q.collisionInterval === 0;
+
+      const cellSize = 14;
+      const grid = new Map();
+
+      let writeIndex = 0;
+      for (let readIndex = 0; readIndex < particles.length; readIndex++) {
+        const p = particles[readIndex];
+        const cfg = materialConfig[p.material];
+
+        particles[writeIndex] = p;
+
+        p.vy += cfg.gravity * dt;
+        p.vx += windForce * dt;
+
+        if (p.material === "water") {
+          p.vx += (Math.random() - 0.5) * 95 * dt;
+          p.vx *= 1.002;
+        }
+
+        if (p.material === "gas") {
+          p.vx += (Math.random() - 0.5) * 48 * dt;
+          p.vy -= 90 * dt;
+        }
+
+        p.vx *= cfg.drag;
+        p.vy *= cfg.drag;
+
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+
+        if (p.x < 0) {
+          p.x = 0;
+          p.vx = Math.abs(p.vx) * cfg.bounce;
+        } else if (p.x > width) {
+          p.x = width;
+          p.vx = -Math.abs(p.vx) * cfg.bounce;
+        }
+
+        if (p.y < 0) {
+          p.y = 0;
+          p.vy = Math.abs(p.vy) * cfg.bounce;
+        } else if (p.y > height) {
+          p.y = height;
+          p.vy = -Math.abs(p.vy) * cfg.bounce;
+          p.vx *= 0.9;
+        }
+
+        const gx = Math.floor(p.x / cellSize);
+        const gy = Math.floor(p.y / cellSize);
+        const key = `${gx},${gy}`;
+        if (!grid.has(key)) {
+          grid.set(key, []);
+        }
+        grid.get(key).push(writeIndex);
+        writeIndex++;
+      }
+      particles.length = writeIndex;
+
+      if (runCollisions) {
+        // Spatial hash neighbor checks keep color fusion and collision response efficient.
+        const dirs = [-1, 0, 1];
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const gx = Math.floor(p.x / cellSize);
+          const gy = Math.floor(p.y / cellSize);
+
+          for (let dx of dirs) {
+            for (let dy of dirs) {
+              const key = `${gx + dx},${gy + dy}`;
+              const list = grid.get(key);
+              if (!list) continue;
+
+              const maxChecks = Math.min(list.length, q.maxNeighbors);
+              for (let idx = 0; idx < maxChecks; idx++) {
+                const j = list[idx];
+                if (j <= i) continue;
+                const other = particles[j];
+
+                const rx = other.x - p.x;
+                const ry = other.y - p.y;
+                const dist2 = rx * rx + ry * ry;
+                const minDist = (p.size + other.size) * 0.55;
+                if (dist2 > minDist * minDist || dist2 < 0.0001) continue;
+
+                const dist = Math.sqrt(dist2);
+                const nx = rx / dist;
+                const ny = ry / dist;
+
+                const overlap = (minDist - dist) * 0.5;
+                p.x -= nx * overlap;
+                p.y -= ny * overlap;
+                other.x += nx * overlap;
+                other.y += ny * overlap;
+
+                const rvx = other.vx - p.vx;
+                const rvy = other.vy - p.vy;
+                const rel = rvx * nx + rvy * ny;
+
+                if (rel < 0) {
+                  const impulse = -rel * 0.55;
+                  p.vx -= impulse * nx;
+                  p.vy -= impulse * ny;
+                  other.vx += impulse * nx;
+                  other.vy += impulse * ny;
+
+                  if (
+                    p.color.r !== other.color.r ||
+                    p.color.g !== other.color.g ||
+                    p.color.b !== other.color.b
+                  ) {
+                    const fused = mixColor(p.color, other.color);
+                    p.color = fused;
+                    other.color = { ...fused };
+                  }
+
+                  collisionEnergy += Math.abs(rel);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (collisionEnergy > 8) {
+        playCollisionSound(collisionEnergy);
+      }
+      collisionEnergy *= 0.2;
+    }
+
+    function draw() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      ctx.fillStyle = "rgba(6, 10, 17, 0.2)";
+      ctx.fillRect(0, 0, width, height);
+
+      drawHeatMap();
+
+      const q = getQuality();
+      const drawOffset = q.drawStep > 1 ? frameIndex % q.drawStep : 0;
+      for (let i = drawOffset; i < particles.length; i += q.drawStep) {
+        const p = particles[i];
+        ctx.fillStyle = rgbToCss(p.color);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      if (pointer.down) {
+        ctx.strokeStyle = "rgba(155, 225, 255, 0.65)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(pointer.x, pointer.y, Number(ui.radius.value), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ui.stats.innerHTML = `
+        Osakesed: <strong>${particles.length}</strong><br>
+        Materjal: <strong>${ui.material.value}</strong><br>
+        Reziim: <strong>${ui.toolMode.value}</strong><br>
+        Tuul: <strong>${windForce.toFixed(0)}</strong><br>
+        Freeze: <strong>${isFrozen ? "ON" : "OFF"}</strong><br>
+        Auto: <strong>${getQuality().label}</strong><br>
+        FPS: <strong>${Math.max(1, Math.round(1000 / smoothFrameMs))}</strong>
+      `;
+    }
+
+    function loop(now) {
+      const dt = Math.min(0.033, (now - lastTime) / 1000);
+      lastTime = now;
+      frameIndex++;
+      updateAutoSimplification(dt);
+
+      if (!isFrozen) {
+        applyBrushForce(dt);
+        applySelfOrganization(dt);
+        updatePhysics(dt);
+      }
+      draw();
+
+      requestAnimationFrame(loop);
+    }
+
+    function setPointer(ev) {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = ev.clientX - rect.left;
+      pointer.y = ev.clientY - rect.top;
+    }
+
+    canvas.addEventListener("pointerdown", (ev) => {
+      unlockAudio();
+      pointer.down = true;
+      setPointer(ev);
+    });
+
+    window.addEventListener("pointerup", () => {
+      pointer.down = false;
+    });
+
+    window.addEventListener("pointermove", setPointer);
+
+    ui.clearBtn.addEventListener("click", () => {
+      particles.length = 0;
+      organizeActive = false;
+    });
+
+    ui.wind.addEventListener("input", () => {
+      windForce = Number(ui.wind.value);
+    });
+
+    ui.heatMap.addEventListener("change", () => {
+      heatMapEnabled = ui.heatMap.checked;
+    });
+
+    ui.organizeBtn.addEventListener("click", () => {
+      const text = (ui.wordInput.value || "").trim().slice(0, 14);
+      const targetWord = text.length > 0 ? text.toUpperCase() : "SANDBOX";
+      organizationTargets = buildTextTargets(targetWord);
+      organizeActive = organizationTargets.length > 0;
+      if (organizeActive) {
+        ui.organizeBtn.textContent = "Rivistus aktiivne";
+      }
+    });
+
+    ui.freezeBtn.addEventListener("click", () => {
+      isFrozen = !isFrozen;
+      ui.freezeBtn.textContent = isFrozen ? "Jatka aega" : "Peata aeg";
+    });
+
+    window.addEventListener("resize", resize);
+
+    resize();
+    ctx.fillStyle = "#060a11";
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>08 Shake to Clear</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background: #e9f0ff;
+      font-family: "Verdana", sans-serif;
+    }
+    .item {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 8px 16px #0000002a;
+      transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 700ms;
+    }
+    .hint { position: fixed; left: 10px; top: 8px; }
+    .fall {
+      transform: translateY(120vh) rotate(40deg);
+      opacity: 0;
+    }
+  </style>
+  <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+  <div class="hint">Raputa hiirt kiiresti vasakule-paremale.</div>
+  <script>
+    const colors = ['#ff006e', '#8338ec', '#3a86ff', '#00b4d8', '#2a9d8f'];
+    for (let i = 0; i < 14; i += 1) {
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.textContent = i + 1;
+      el.style.left = `${20 + Math.random() * (innerWidth - 160)}px`;
+      el.style.top = `${40 + Math.random() * (innerHeight - 180)}px`;
+      el.style.background = colors[i % colors.length];
+      document.body.appendChild(el);
+    }
+
+    let lastX = null;
+    let lastDir = 0;
+    let shakeScore = 0;
+    let lastTime = performance.now();
+    let dropped = false;
+
+    addEventListener('pointermove', (event) => {
+      if (dropped) return;
+
+      const now = performance.now();
+      const dt = Math.max(1, now - lastTime);
+      if (lastX === null) {
+        lastX = event.clientX;
+        lastTime = now;
+        return;
+      }
+
+      const dx = event.clientX - lastX;
+      const speed = Math.abs(dx) / dt;
+      const dir = dx > 0 ? 1 : dx < 0 ? -1 : 0;
+
+      // Fast horizontal direction changes quickly increase shake score.
+      if (Math.abs(dx) > 8 && dir !== 0 && dir !== lastDir && speed > 0.4) {
+        shakeScore += 1.4;
+      } else {
+        shakeScore = Math.max(0, shakeScore - 0.08);
+      }
+
+      if (shakeScore >= 3) {
+        dropped = true;
+        document.querySelectorAll('.item').forEach((el) => el.classList.add('fall'));
+      }
+
+      lastDir = dir || lastDir;
+      lastX = event.clientX;
+      lastTime = now;
+    });
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>
