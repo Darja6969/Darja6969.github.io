@@ -1,0 +1,544 @@
+/* Global reset: normalize box model and remove browser default spacing. */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Theme tokens used across the UI for consistent colors and sizing. */
+:root {
+    --bg-1: #05070a;
+    --bg-2: #101722;
+    --bg-3: #161f2d;
+    --ink: #e7f0ff;
+    --muted: #8aa0c0;
+    --cyan: #00d2ff;
+    --lime: #8cff65;
+    --warn: #ff9f5a;
+    --danger: #ff5d73;
+    --grid-gap: 6px;
+    --board-size: min(64vw, 640px);
+}
+
+/* Page background and base typography. */
+body {
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(0, 210, 255, 0.18), transparent 45%),
+        radial-gradient(circle at 90% 10%, rgba(140, 255, 101, 0.12), transparent 30%),
+        linear-gradient(165deg, var(--bg-1), var(--bg-2) 45%, var(--bg-3));
+}
+
+/* Main page container. */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header card. */
+header {
+    border: 1px solid rgba(0, 210, 255, 0.4);
+    background: rgba(12, 20, 32, 0.75);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Main title style. */
+h1 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    letter-spacing: 0.15em;
+    color: var(--cyan);
+    text-transform: uppercase;
+}
+
+/* Small helper subtitle under title. */
+.subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-top: 6px;
+}
+
+/* Top control strip layout. */
+.control-strip {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px solid rgba(0, 210, 255, 0.35);
+    border-radius: 12px;
+    background: rgba(10, 18, 29, 0.8);
+    display: grid;
+    gap: 12px;
+}
+
+/* Generic control group for labels + form controls. */
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Music selector block width constraint. */
+.music-group {
+    min-width: 220px;
+}
+
+/* Shared label style used in multiple panels. */
+label,
+.stat-label,
+.record-box h3,
+.leaderboard-box h3 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+}
+
+/* Inherit app font for form controls. */
+select,
+button {
+    font: inherit;
+}
+
+/* Select dropdown visuals. */
+select {
+    color: var(--ink);
+    background: #0f1623;
+    border: 1px solid rgba(0, 210, 255, 0.45);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+/* Shared flex rows for grouped buttons and controls. */
+.button-group,
+.music-controls,
+.bottom-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Base app button style. */
+.btn {
+    border: 1px solid var(--cyan);
+    background: transparent;
+    color: var(--cyan);
+    padding: 10px 14px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Hover feedback for enabled buttons. */
+.btn:hover {
+    background: var(--cyan);
+    color: #09101a;
+    box-shadow: 0 0 18px rgba(0, 210, 255, 0.45);
+}
+
+/* Disabled button state. */
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* Main content wrapper. */
+main {
+    margin-top: 18px;
+    flex: 1;
+}
+
+/* Two-column desktop layout: board + side panel. */
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+}
+
+/* Shared card container style. */
+.assembly-section,
+.side-section,
+.storage-section,
+.record-box,
+.leaderboard-box {
+    border: 1px solid rgba(0, 210, 255, 0.35);
+    background: rgba(8, 14, 24, 0.78);
+    border-radius: 12px;
+    padding: 14px;
+}
+
+/* Section title style. */
+.assembly-section h2,
+.side-section h2,
+.storage-section h2 {
+    color: var(--cyan);
+    margin-bottom: 10px;
+}
+
+/* Board shell creates a stacking context for ghost + board layers. */
+.board-shell {
+    position: relative;
+    width: var(--board-size);
+    height: var(--board-size);
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Hint image layer shown behind pieces when Vaata is enabled. */
+.ghost-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    transition: opacity 0.2s ease;
+    filter: grayscale(0.1);
+}
+
+/* Active state for ghost hint visibility. */
+.ghost-layer.visible {
+    opacity: 0.24;
+}
+
+/* Interactive board grid where pieces are dropped and positioned. */
+.game-board {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(var(--grid, 4), 1fr);
+    grid-template-rows: repeat(var(--grid, 4), 1fr);
+    gap: 0;
+    padding: 0;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 210, 255, 0.45);
+    background: rgba(9, 16, 26, 0.12);
+    overflow: hidden;
+}
+
+/* Placeholder slot cell for visual board structure. */
+.board-slot {
+    border: 1px dashed rgba(138, 160, 192, 0.45);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Highlight for magnetic snap guidance near correct slot. */
+.board-slot.magnet {
+    border-color: var(--lime);
+    box-shadow: 0 0 12px rgba(140, 255, 101, 0.5) inset;
+}
+
+/* Side column layout. */
+.side-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Source image preview frame. */
+.image-preview {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    border: 1px dashed rgba(138, 160, 192, 0.5);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    background: rgba(0, 0, 0, 0.25);
+}
+
+/* Previewed source image fit strategy. */
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Camera preview hidden by default until stream is active. */
+#cameraPreview {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 210, 255, 0.45);
+    display: none;
+}
+
+/* Camera preview visible state. */
+#cameraPreview.active {
+    display: block;
+}
+
+/* Moves/time mini-dashboard. */
+.stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* Individual stat tile. */
+.stat-item {
+    border: 1px solid rgba(138, 160, 192, 0.35);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Numeric value emphasis inside stat tile. */
+.stat-value {
+    font-size: 1.4rem;
+    color: var(--cyan);
+    font-weight: 700;
+}
+
+/* Small margin tweak for record/leaderboard cards. */
+.record-box,
+.leaderboard-box {
+    margin-top: 2px;
+}
+
+/* Best record highlight color. */
+#currentRecord {
+    color: var(--lime);
+    margin: 8px 0 12px;
+    font-weight: 700;
+}
+
+/* Ordered list layout for leaderboard. */
+#leaderboardList {
+    margin-top: 8px;
+    padding-left: 20px;
+    display: grid;
+    gap: 6px;
+    color: var(--ink);
+}
+
+/* Storage section spacing. */
+.storage-section {
+    margin-top: 16px;
+}
+
+/* Piece storage area with scrolling. */
+.storage {
+    min-height: 120px;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px dashed rgba(0, 210, 255, 0.55);
+    border-radius: 10px;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 8px;
+}
+
+/* Visual feedback when dragging over storage drop target. */
+.storage.drag-target {
+    border-color: var(--warn);
+}
+
+/* Empty-state helper text for storage area. */
+.storage:empty::after {
+    content: "Cut image to generate pieces";
+    color: var(--muted);
+    align-self: center;
+    justify-self: center;
+}
+
+/* Base style for draggable puzzle pieces. */
+.puzzle-piece {
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background-repeat: no-repeat;
+    background-size: var(--board-size) var(--board-size);
+    cursor: grab;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Hover lift effect for free pieces. */
+.puzzle-piece:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.55);
+}
+
+/* Temporary style while piece is being dragged. */
+.puzzle-piece.dragging {
+    opacity: 0.7;
+}
+
+/* Correctly positioned piece visual marker. */
+.puzzle-piece.snapped {
+    outline: 2px solid rgba(140, 255, 101, 0.95);
+}
+
+/* Locked pieces cannot be moved after snapping to correct slot. */
+.puzzle-piece.locked {
+    cursor: default;
+    box-shadow: 0 0 0 1px rgba(140, 255, 101, 0.95), 0 0 16px rgba(140, 255, 101, 0.5);
+}
+
+/* Bottom action button row. */
+.bottom-actions {
+    margin-top: 14px;
+    justify-content: center;
+}
+
+/* Full-screen success overlay shown on win. */
+.success-banner {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 7, 10, 0.72);
+    z-index: 30;
+    color: var(--lime);
+    font-size: clamp(2.2rem, 12vw, 6rem);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 24px rgba(140, 255, 101, 0.6);
+}
+
+/* Success overlay visible state. */
+.success-banner.visible {
+    display: flex;
+}
+
+/* Full-screen canvas used for fireworks particle animation. */
+#fireworksCanvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 35;
+}
+
+/* Footer style. */
+footer {
+    margin-top: 16px;
+    text-align: center;
+    color: var(--muted);
+}
+
+/* Tablet and down: stack columns and enlarge board relative to viewport. */
+@media (max-width: 1060px) {
+    :root {
+        --board-size: min(88vw, 620px);
+    }
+
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .side-section {
+        order: -1;
+    }
+}
+
+/* Small devices: buttons become more flexible in width. */
+@media (max-width: 680px) {
+    .control-strip {
+        gap: 10px;
+    }
+
+    .button-group .btn,
+    .music-controls .btn {
+        flex: 1 1 44%;
+    }
+}
+
+/* Legacy responsive rules kept for compatibility with older class names. */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr 320px;
+        gap: 20px;
+    }
+
+    .right-panel {
+        position: sticky;
+        top: 20px;
+    }
+
+    .game-board {
+        grid-template-columns: repeat(4, 1fr);
+        min-height: 400px;
+        gap: 8px;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .right-panel {
+        position: static;
+    }
+
+    .game-board {
+        grid-template-columns: repeat(4, 1fr);
+        min-height: 300px;
+    }
+
+    .controls {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .storage {
+        min-height: 120px;
+        max-height: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-board {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    header {
+        padding: 20px 10px;
+    }
+
+    .panel-section {
+        padding: 15px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 12px;
+        font-size: 0.9em;
+    }
+}
+

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Mario Platformer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="game-shell">
+    <header class="hud" id="hud">
+      <div><span class="label">Monety:</span> <span id="coins">0</span></div>
+      <div><span class="label">Zhizni:</span> <span id="lives">3</span></div>
+      <div><span class="label">Uroven:</span> <span id="level">1-1</span></div>
+      <div id="message" class="message">Doidi do flaga!</div>
+      <button id="fullscreenBtn" class="hud-btn" type="button">Fullscreen</button>
+    </header>
+    <div class="canvas-wrap">
+      <canvas id="game" width="960" height="540" aria-label="Platformer game canvas"></canvas>
+      <div id="startScreen" class="screen-overlay show">
+        <h1>PIXEL MARIO</h1>
+        <p>3 urovnya, bonus bloki i cvetki uskoreniya</p>
+        <button id="startBtn" type="button">START</button>
+      </div>
+    </div>
+    <footer class="help">
+      Upravlenie: A/D ili strely - beg, W/Space/Up - pryzhok, R - restart, Enter - start, F - fullscreen
+    </footer>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

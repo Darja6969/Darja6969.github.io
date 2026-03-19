@@ -1,0 +1,189 @@
+:root {
+  --bg-top: #79b8ff;
+  --bg-mid: #9dd2ff;
+  --bg-bottom: #e7f6ff;
+  --panel: #1a2440;
+  --panel-edge: #5f7cbf;
+  --text: #f9fcff;
+  --accent: #ffe36b;
+  --pixel-shadow: #0f1729;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  display: block;
+  font-family: "Press Start 2P", monospace;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      #ffffff00 0,
+      #ffffff00 15px,
+      #ffffff18 16px,
+      #ffffff18 16px
+    ),
+    linear-gradient(180deg, var(--bg-top), var(--bg-mid) 55%, var(--bg-bottom));
+}
+
+.game-shell {
+  width: 100vw;
+  height: 100vh;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  color: var(--text);
+  background: var(--panel);
+  border: 4px solid var(--panel-edge);
+  border-bottom: 0;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0 var(--pixel-shadow);
+  font-size: 12px;
+}
+
+.label {
+  color: var(--accent);
+}
+
+.message {
+  text-align: right;
+}
+
+.canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 4px solid #203452;
+  border-top: none;
+  border-bottom: none;
+  background: #7ec9ff;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.help {
+  color: #f2f8ff;
+  font-weight: 700;
+  background: #1a2440;
+  border: 4px solid var(--panel-edge);
+  border-top: none;
+  padding: 10px 12px;
+  text-shadow: 2px 2px 0 var(--pixel-shadow);
+  line-height: 1.6;
+  font-size: 11px;
+}
+
+.hud-btn {
+  appearance: none;
+  border: 3px solid #f8f8ff;
+  background: #2f5dcf;
+  color: #fff;
+  font-family: inherit;
+  font-size: 11px;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.hud-btn:active {
+  transform: translate(1px, 1px);
+}
+
+.screen-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  text-align: center;
+  color: #fff;
+  background: #08101ccc;
+  padding: 20px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.screen-overlay.show {
+  display: flex;
+}
+
+.screen-overlay h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.4;
+}
+
+.screen-overlay p {
+  margin: 0;
+  max-width: 660px;
+  line-height: 1.7;
+  font-size: 12px;
+}
+
+#startBtn {
+  appearance: none;
+  border: 4px solid #f8f8ff;
+  background: #d94a34;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 12px 20px;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0 #000;
+}
+
+#startBtn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+@media (max-width: 760px) {
+  .hud {
+    font-size: 10px;
+  }
+
+  .help {
+    font-size: 9px;
+  }
+
+  .screen-overlay h1 {
+    font-size: 18px;
+  }
+
+  .screen-overlay p {
+    font-size: 9px;
+  }
+
+  .hud-btn {
+    font-size: 9px;
+    padding: 7px 8px;
+  }
+}

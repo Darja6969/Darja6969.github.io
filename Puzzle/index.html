@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Puzzle</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%230a1220'/%3E%3Crect x='8' y='8' width='48' height='48' rx='8' fill='none' stroke='%2300d2ff' stroke-width='4'/%3E%3Cpath d='M20 22h24M20 32h24M20 42h24M22 20v24M32 20v24M42 20v24' stroke='%238cff65' stroke-width='2'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Main page wrapper: contains the whole game UI and footer -->
+    <div class="container">
+        <!-- Title block with app name and short slogan -->
+        <header>
+            <h1>Pixel Puzzle</h1>
+            <p class="subtitle">Build smarter, piece by piece</p>
+        </header>
+
+        <!-- Top controls: difficulty, shape, image source, ghost hint, and music -->
+        <section class="control-strip">
+            <div class="control-group">
+                <label for="difficultySelect">Difficulty</label>
+                <select id="difficultySelect">
+                    <option value="3">3x3</option>
+                    <option value="5" selected>5x5</option>
+                    <option value="10">10x10</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="shapeSelect">Shape</label>
+                <select id="shapeSelect">
+                    <option value="square">Squares</option>
+                    <option value="triangle">Triangles</option>
+                    <option value="polygon" selected>Random Polygons</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <!-- Hidden native file input; triggered by custom button -->
+                <input type="file" id="photoInput" accept="image/*" hidden>
+                <button class="btn" id="uploadBtn">Upload Photo</button>
+                <button class="btn" id="cameraBtn">Use Camera</button>
+                <button class="btn" id="captureBtn" disabled>Capture</button>
+                <button class="btn" id="cutBtn" disabled>Cut into Puzzles</button>
+                <button class="btn" id="ghostBtn" disabled>Vaata</button>
+            </div>
+
+            <div class="control-group music-group">
+                <label for="musicSelect">Background Music</label>
+                <div class="music-controls">
+                    <select id="musicSelect">
+                        <option value="off">Off</option>
+                        <option value="chill" selected>Chill Pulse</option>
+                        <option value="focus">Focus Loop</option>
+                        <option value="arcade">Arcade Spark</option>
+                    </select>
+                    <button class="btn" id="musicToggle">Play</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main game area: board + side panel + storage + bottom actions -->
+        <main>
+            <div class="main-grid">
+                <!-- Left: where puzzle pieces are assembled -->
+                <section class="assembly-section">
+                    <h2>Assembly Field</h2>
+                    <div class="board-shell">
+                        <!-- Semi-transparent full image hint (shown when Vaata is active) -->
+                        <div class="ghost-layer" id="ghostLayer"></div>
+                        <!-- Puzzle board and dropped pieces live here -->
+                        <div class="game-board" id="gameBoard"></div>
+                    </div>
+                </section>
+
+                <!-- Right: source image preview, camera, stats, and records -->
+                <aside class="side-section">
+                    <h2>Original Image</h2>
+                    <div class="image-preview" id="imagePreview">
+                        <span>No image selected</span>
+                    </div>
+                    <!-- Camera preview used for capture mode -->
+                    <video id="cameraPreview" autoplay playsinline muted></video>
+
+                    <!-- Live game statistics -->
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Moves</span>
+                            <span class="stat-value" id="moves">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Time</span>
+                            <span class="stat-value" id="timer">00:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Best result summary + explicit JSON export button -->
+                    <div class="record-box">
+                        <h3>Current Record</h3>
+                        <p id="currentRecord">No record yet</p>
+                        <button class="btn" id="downloadRecordsBtn">Download JSON</button>
+                    </div>
+
+                    <!-- Top records list rendered from localStorage data -->
+                    <div class="leaderboard-box">
+                        <h3>Leaderboard</h3>
+                        <ol id="leaderboardList"></ol>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Bottom pool where shuffled pieces are stored before placement -->
+            <section class="storage-section">
+                <h2>Storage</h2>
+                <div class="storage" id="storage"></div>
+            </section>
+
+            <!-- Session controls -->
+            <section class="bottom-actions">
+                <button class="btn" id="newGameBtn">New Game</button>
+                <button class="btn" id="resetBtn">Reset</button>
+            </section>
+        </main>
+
+        <!-- Win overlay and fireworks canvas for finish celebration -->
+        <div class="success-banner" id="successBanner">Success</div>
+        <canvas id="fireworksCanvas"></canvas>
+
+        <!-- Static footer -->
+        <footer>
+            <p>&copy; 2026 Pixel Puzzle</p>
+        </footer>
+    </div>
+
+    <!-- Game logic entry point -->
+    <script src="script.js"></script>
+</body>
+</html>
