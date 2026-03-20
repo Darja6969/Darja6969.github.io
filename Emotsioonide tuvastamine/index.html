@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emotion Detection App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="emotion-neutral">
+  <main class="app-shell">
+    <section class="left-panel">
+      <p class="eyebrow">Real-time camera detection</p>
+      <h1>Emotions that transform your atmosphere</h1>
+      <p class="description">
+        The app reads facial expressions from your camera and automatically
+        adapts the entire background using four core states: happy, sad,
+        neutral, and angry.
+      </p>
+
+      <div class="status-grid">
+        <article class="status-card">
+          <span>Current emotion</span>
+          <strong id="emotionLabel">Neutral</strong>
+        </article>
+        <article class="status-card">
+          <span>Confidence</span>
+          <strong id="confidenceLabel">0%</strong>
+        </article>
+      </div>
+
+      <p id="infoText" class="info">Loading models...</p>
+      <button id="retryButton" class="retry-button" type="button">Retry camera</button>
+    </section>
+
+    <section class="camera-panel">
+      <div class="camera-frame">
+        <video id="video" autoplay muted playsinline></video>
+        <img id="emotionEffect" class="emotion-effect" src="happy.png" alt="Emotion effect" hidden />
+        <div class="scanline"></div>
+      </div>
+    </section>
+  </main>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <script defer src="app.js"></script>
+</body>
+</html>

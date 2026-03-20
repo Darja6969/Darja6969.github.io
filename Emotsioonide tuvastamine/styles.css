@@ -1,0 +1,231 @@
+:root {
+  --bg-1: #16222a;
+  --bg-2: #3a6073;
+  --text: #f2f6f9;
+  --panel: rgba(255, 255, 255, 0.08);
+  --panel-border: rgba(255, 255, 255, 0.2);
+  --accent: #ffd166;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.12), transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.08), transparent 40%),
+    linear-gradient(125deg, var(--bg-1), var(--bg-2));
+  transition: background 700ms ease;
+  overflow-x: hidden;
+}
+
+.app-shell {
+  width: min(1120px, 92vw);
+  margin: 0 auto;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+.left-panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 22px;
+  padding: 2rem;
+  backdrop-filter: blur(8px);
+  animation: rise-in 600ms ease;
+}
+
+.eyebrow {
+  margin: 0;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+h1 {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(2.2rem, 6vw, 4.5rem);
+  line-height: 0.96;
+  margin: 0.8rem 0 1rem;
+}
+
+.description {
+  margin: 0;
+  max-width: 55ch;
+  opacity: 0.95;
+}
+
+.status-grid {
+  margin-top: 1.8rem;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.status-card {
+  padding: 1rem;
+  background: rgba(15, 16, 20, 0.35);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.status-card span {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.82;
+  margin-bottom: 0.35rem;
+}
+
+.status-card strong {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.info {
+  margin-top: 1.2rem;
+  min-height: 1.4rem;
+  font-size: 0.95rem;
+}
+
+.retry-button {
+  margin-top: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(15, 16, 20, 0.42);
+  color: var(--text);
+  padding: 0.62rem 0.95rem;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.retry-button:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.retry-button:active {
+  transform: translateY(0);
+}
+
+.camera-panel {
+  animation: rise-in 850ms ease;
+}
+
+.camera-frame {
+  position: relative;
+  border-radius: 26px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+}
+
+video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #0f1014;
+}
+
+.emotion-effect {
+  position: absolute;
+  width: clamp(64px, 9vw, 96px);
+  height: auto;
+  transform: translateY(-50%);
+  pointer-events: none;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45));
+  z-index: 3;
+  animation: pop-in 220ms ease;
+}
+
+.scanline {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.22) 50%, transparent 100%);
+  transform: translateY(-100%);
+  animation: scanner 2.6s linear infinite;
+  pointer-events: none;
+}
+
+/* Emotsioonipõhised taustad */
+body.emotion-happy {
+  --bg-1: #f4b41a;
+  --bg-2: #e66c37;
+}
+
+body.emotion-sad {
+  --bg-1: #134e5e;
+  --bg-2: #71b280;
+}
+
+body.emotion-angry {
+  --bg-1: #870000;
+  --bg-2: #190a05;
+}
+
+body.emotion-neutral {
+  --bg-1: #16222a;
+  --bg-2: #3a6073;
+}
+
+body.emotion-humility {
+  --bg-1: #2d3a3a;
+  --bg-2: #7e8f85;
+}
+
+@keyframes scanner {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    padding: 1.2rem 0 1.5rem;
+  }
+
+  .left-panel,
+  .camera-frame {
+    border-radius: 18px;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+}
